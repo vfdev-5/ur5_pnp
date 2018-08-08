@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+<material name="white">
+  <color rgba="1 1 1 0.7"/>
+</material>
+
+<material name="gray">
+  <color rgba="0.8 0.8 0.8 0.7"/>
+</material>
+
+<xacro:macro name="box_source" params="name">
+  <link name="${name}">
+    <visual>
+      <geometry>
+        <box size="0.38 0.25 0.15"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.38 0.25 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+</xacro:macro>
+
+
+<xacro:macro name="box_destination" params="name">
+  <link name="${name}">
+    <visual>
+      <geometry>
+        <box size="0.32 0.22 0.12"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.32 0.22 0.12"/>
+      </geometry>
+    </collision>
+  </link>
+</xacro:macro>
+
+</robot>
+
