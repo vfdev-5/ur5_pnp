@@ -1,25 +1,42 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
+<xacro:property name="half_pi" value="1.57079632679" />
+
+<!-- Definitions of box source dimensions  -->
+<xacro:property name="bsw" value="0.37" />
+<xacro:property name="bsh" value="0.245" />
+<xacro:property name="bsz" value="0.15" />
+
+<!-- Definitions of box destination dimensions  -->
+<xacro:property name="bdw" value="0.33" />
+<xacro:property name="bdh" value="0.255" />
+<xacro:property name="bdz" value="0.10" />
+
+
+
 <material name="white">
   <color rgba="1 1 1 0.7"/>
 </material>
 
 <material name="gray">
-  <color rgba="0.8 0.8 0.8 0.7"/>
+  <color rgba="0.8 0.8 0.0 0.7"/>
 </material>
 
 <xacro:macro name="box_source" params="name">
   <link name="${name}">
     <visual>
+      <origin rpy="0 0 ${half_pi}" xyz="-${bsh * 0.5} ${bsw * 0.5} -${bsz * 0.5}"/>
       <geometry>
-        <box size="0.38 0.25 0.15"/>
+        <box size="${bsw} ${bsh} ${bsz}"/>
       </geometry>
       <material name="white"/>
+
     </visual>
     <collision>
       <geometry>
-        <box size="0.38 0.25 0.05"/>
+      <!-- collision is smaller than the real size -->
+        <box size="${bsw} ${bsh} 0.05"/>
       </geometry>
     </collision>
   </link>
@@ -29,14 +46,15 @@
 <xacro:macro name="box_destination" params="name">
   <link name="${name}">
     <visual>
+      <origin rpy="0 0 ${half_pi}" xyz="-${bdh * 0.5} ${bdw * 0.5} -${bdz * 0.5}"/>
       <geometry>
-        <box size="0.32 0.22 0.12"/>
+        <box size="${bdw} ${bdh} ${bdz}"/>
       </geometry>
       <material name="gray"/>
     </visual>
     <collision>
       <geometry>
-        <box size="0.32 0.22 0.12"/>
+        <box size="${bdw} ${bdh} ${bdz}"/>
       </geometry>
     </collision>
   </link>

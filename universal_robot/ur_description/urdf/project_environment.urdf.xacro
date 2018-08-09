@@ -2,29 +2,76 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:include filename="$(find ur_description)/urdf/env/box.urdf.xacro" />
+  <xacro:include filename="$(find ur_description)/urdf/env/table.urdf.xacro" />
+
+  <!-- Definitions of workspace dimensions (world) -->
+  <xacro:property name="ws_ysize" value="1.06" />
+  <xacro:property name="ws_xsize" value="1.19" />
 
   <link name="world"/>
 
   <xacro:table name="table"/>
   <xacro:box_source name="box_1"/>
+  <xacro:box_source name="box_2"/>
+  <xacro:box_source name="box_3"/> 
+  <xacro:box_source name="box_4"/>
+  <xacro:box_source name="box_5"/>
+  <xacro:box_source name="box_6"/> 
+  <xacro:box_source name="box_7"/>
   <xacro:box_destination name="box_dst"/>
 
   <joint name="world_table_link_joint" type="fixed">
     <parent link="world"/>
     <child link="table"/>
-    <origin xyz="0 0 0.05" rpy="0 0 0"/>
+    <origin xyz="-0.105 0.065 0.025" rpy="0 0 0"/>
   </joint>
 
   <joint name="world_box_1_joint" type="fixed">
     <parent link="world"/>
     <child link="box_1"/>
-    <origin xyz="2.0 0 0.0" rpy="0 0 0"/>
+    <origin xyz="0.0 ${ws_ysize - bsw} ${bsz}" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="world_box_2_joint" type="fixed">
+    <parent link="world"/>
+    <child link="box_2"/>
+    <origin xyz="${-bsh*1} ${ws_ysize - bsw} ${bsz}" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="world_box_3_joint" type="fixed">
+    <parent link="world"/>
+    <child link="box_3"/>
+    <origin xyz="${-bsh * 2} ${ws_ysize - bsw} ${bsz}" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="world_box_4_joint" type="fixed">
+    <parent link="world"/>
+    <child link="box_4"/>
+    <origin xyz="${-bsh * 3 + bsh * 0.5} ${ws_ysize - bsw} ${bsz}" rpy="0 0 ${half_pi}"/>
+  </joint>
+
+  <joint name="world_box_5_joint" type="fixed">
+    <parent link="world"/>
+    <child link="box_5"/>
+    <origin xyz="${-bsh * 3 + bsh * 0.5} ${ws_ysize - bsw - bsh} ${bsz}" rpy="0 0 ${half_pi}"/>
+  </joint>
+
+  <joint name="world_box_6_joint" type="fixed">
+    <parent link="world"/>
+    <child link="box_6"/>
+    <origin xyz="${-bsh * 3 + bsh * 0.5} ${ws_ysize - bsw - bsh * 2} ${bsz}" rpy="0 0 ${half_pi}"/>
+  </joint>
+
+  <joint name="world_box_7_joint" type="fixed">
+    <parent link="world"/>
+    <child link="box_7"/>
+    <origin xyz="${-bsh * 3 + bsh * 0.5 + bsw} ${ws_ysize - bsw} ${bsz + tz}" rpy="0 0 ${half_pi}"/>
   </joint>
 
   <joint name="world_box_dst_joint" type="fixed">
     <parent link="world"/>
     <child link="box_dst"/>
-    <origin xyz="2.0 2.0 0.0" rpy="0 0 0"/>
+    <origin xyz="${-bsh * 3 + bsh * 0.5 - bsw} ${ws_ysize - bsw - bsh * 2} ${bdz}" rpy="0 0 0"/>
   </joint>
 
 </robot>

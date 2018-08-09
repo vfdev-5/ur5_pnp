@@ -20,6 +20,15 @@
   <!-- We do not have a robot connected, so publish fake joint states -->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
     <param name="/use_gui" value="false"/> 
+      <rosparam>
+        zeros:
+          shoulder_pan_joint: 0.0
+          shoulder_lift_joint: -1.57
+          elbow_joint: 0.0
+          wrist_1_joint: -1.57
+          wrist_2_joint: 0.0
+          wrist_3_joint: 0.0
+      </rosparam>
     <rosparam param="/source_list">[/move_group/fake_controller_joint_states]</rosparam>
   </node>
   

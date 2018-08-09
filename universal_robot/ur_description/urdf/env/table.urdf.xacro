@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+
+<!-- Definition of table dimensions  -->
+<xacro:property name="tw" value="0.5" />
+<xacro:property name="th" value="0.515" />
+<xacro:property name="tz" value="0.025" />
+
+<material name="yellow">
+  <color rgba="1 1 0 1"/>
+</material>
+
+
+<xacro:macro name="table" params="name">
+  <link name="table">
+    <visual>
+      <!-- xyz point is zero of the parent link -->
+      <origin rpy="0 0 0" xyz="-${tw * 0.5} ${th * 0.5} -${tz * 0.5}"/>
+      <geometry>
+        <box size="${tw} ${th} ${tz}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${tw} ${th} ${tz}"/>
+      </geometry>
+    </collision>
+  </link>
+</xacro:macro>
+
+</robot>
+
