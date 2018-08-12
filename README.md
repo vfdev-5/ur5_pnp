@@ -24,3 +24,5 @@ cd ur5_pnp_ws && catkin_make
 source devel/setup.bash
 roslaunch ur5_moveit_config demo.launch
 ```
+
+![rviz](assets/rviz_demo.png)

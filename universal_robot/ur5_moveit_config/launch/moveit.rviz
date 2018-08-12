@@ -71,8 +71,8 @@ Visualization Manager:
           Y: 0
           Z: 0
         Size:
-          X: 2
-          Y: 2
+          X: 3
+          Y: 2.5
           Z: 0
       Name: MotionPlanning
       Planned Path:
@@ -352,7 +352,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.94698858
+      Distance: 2.87657928
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
@@ -367,10 +367,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.629797101
+      Pitch: 0.544797182
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.27537274
+      Yaw: 3.53037167
     Saved: ~
 Window Geometry:
   Displays:
@@ -392,5 +392,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1366
-  X: -2
-  Y: 23
+  X: -4
+  Y: -2
