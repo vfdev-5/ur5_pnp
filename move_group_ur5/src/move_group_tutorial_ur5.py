@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from math import pi
 import sys
 import copy
 import rospy
@@ -8,6 +7,7 @@ import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
 from geometry_msgs.msg import Point, Quaternion
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 import numpy as np
 from math import pi
 from std_msgs.msg import String
@@ -426,37 +426,51 @@ def main():
         raw_input()
         tutorial.go_to_pose(BOX_1_POSE)
 
-        print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        raw_input()
-        tutorial.go_to_pose(BOX_2_POSE)
+        new_pose = copy.deepcopy(BOX_1_POSE)
+        euler = euler_from_quaternion(
+            (new_pose.orientation.x, new_pose.orientation.y, new_pose.orientation.z, new_pose.orientation.w)
+        )
+        # euler = (R, P, Y)
+        euler = list(euler)
+        euler[1] += 0.5
+        new_pose.orientation = Quaternion(*quaternion_from_euler(euler[0], euler[1], euler[2]))
 
         print "============ Press `Enter` to execute a movement using a joint state goal ..."
         raw_input()
-        tutorial.go_to_pose(BOX_3_POSE)
+        tutorial.go_to_pose(new_pose)
 
-        print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        raw_input()
-        tutorial.go_to_pose(BOX_4_POSE)
 
-        print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        raw_input()
-        tutorial.go_to_pose(BOX_5_POSE)
-
-        print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        raw_input()
-        tutorial.go_to_pose(BOX_6_POSE)
-
-        print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        raw_input()
-        tutorial.go_to_pose(BOX_7_POSE)
-
-        print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        raw_input()
-        tutorial.go_to_pose(BOX_DST_POSE)
-
-        print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        raw_input()
-        tutorial.go_to_pose(UP_POSE)
+        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        # raw_input()
+        # tutorial.go_to_pose(BOX_2_POSE)
+        #
+        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        # raw_input()
+        # tutorial.go_to_pose(BOX_3_POSE)
+        #
+        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        # raw_input()
+        # tutorial.go_to_pose(BOX_4_POSE)
+        #
+        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        # raw_input()
+        # tutorial.go_to_pose(BOX_5_POSE)
+        #
+        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        # raw_input()
+        # tutorial.go_to_pose(BOX_6_POSE)
+        #
+        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        # raw_input()
+        # tutorial.go_to_pose(BOX_7_POSE)
+        #
+        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        # raw_input()
+        # tutorial.go_to_pose(BOX_DST_POSE)
+        #
+        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        # raw_input()
+        # tutorial.go_to_pose(UP_POSE)
 
         # print "============ Press `Enter` to plan and display a Cartesian path ..."
         # raw_input()
