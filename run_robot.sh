@@ -15,3 +15,7 @@ sleep 5
 
 # Start moveit planning execution 
 $TERM -e "source $CD/devel/setup.bash && roslaunch ur5_moveit_config ur5_moveit_planning_execution.launch limited:=true" &
+
+
+# Start rviz
+$TERM -e "source $CD/devel/setup.bash && roslaunch ur5_moveit_config moveit_rviz.launch config:=true" &
