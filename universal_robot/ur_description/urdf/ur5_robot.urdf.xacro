@@ -11,6 +11,9 @@
   <!-- ur5 -->
   <xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro" />
 
+  <!-- actuator -->
+  <xacro:include filename="$(find ur_description)/urdf/actuator.urdf.xacro" />
+
   <!-- arm -->
   <xacro:ur5_robot prefix="" joint_limited="false"/>
 
@@ -19,5 +22,12 @@
     <child link = "base_link" />
     <origin xyz="-0.105 0.09 0.0" rpy="0.0 0.0 1.57079632679" />
   </joint>
+
+  <joint name="ee_link_table_base_plexi_joint" type="fixed">
+    <parent link="ee_link" />
+    <child link = "base_plexi" />
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 1.57079632679 0.0" />
+  </joint>
+
   
 </robot>

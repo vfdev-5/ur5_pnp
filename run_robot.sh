@@ -9,7 +9,7 @@ $TERM -e "source $CD/devel/setup.bash &&  roscore" &
 sleep 5
 
 # Bring up robot
-$TERM -e "source $CD/devel/setup.bash && roslaunch  ur_modern_driver ur5_bringup.launch limited:=true robot_ip:=192.168.0.34"  &
+$TERM -e "source $CD/devel/setup.bash && roslaunch  ur_modern_driver ur5_bringup.launch limited:=true robot_ip:=192.168.0.35"  &
 
 sleep 5
 

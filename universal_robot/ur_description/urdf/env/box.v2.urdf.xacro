@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<robot name="actuateur">
+  <link name="base">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.37 0.245 .01"/>
+      </geometry>
+      <material name="mat1">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.37 0.245 .01"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="left">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.37 0.01 .15"/>
+      </geometry>
+      <material name="mat2">
+        <color rgba="1 0 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.37 0.01 .15"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="right">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.37 0.01 .15"/>
+      </geometry>
+      <material name="mat3">
+        <color rgba="1 1 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.37 0.01 .15"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="top">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.01 0.245 .15"/>
+      </geometry>
+      <material name="mat4">
+        <color rgba="0 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.01 0.245 .15"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="bottom">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.01 0.245 .15"/>
+      </geometry>
+      <material name="mat5">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.01 0.245 .15"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_to_left" type="fixed">
+    <parent link="base"/>
+    <child link="left"/>
+    <origin xyz="0 -0.122 0.075 "/>
+  </joint>
+  <joint name="base_to_right" type="fixed">
+    <parent link="base"/>
+    <child link="right"/>
+    <origin xyz="0 0.122 0.075 "/>
+  </joint>
+  <joint name="base_to_top" type="fixed">
+    <parent link="base"/>
+    <child link="top"/>
+    <origin xyz="0.185 0.0 0.075 "/>
+  </joint>
+  <joint name="base_to_bottom" type="fixed">
+    <parent link="base"/>
+    <child link="bottom"/>
+    <origin xyz="-0.185 0.0 0.075 "/>
+  </joint>
+</robot>

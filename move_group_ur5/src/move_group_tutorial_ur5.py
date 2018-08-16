@@ -440,37 +440,39 @@ def main():
         tutorial.go_to_pose(new_pose)
 
 
-        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        # raw_input()
-        # tutorial.go_to_pose(BOX_2_POSE)
-        #
-        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        # raw_input()
-        # tutorial.go_to_pose(BOX_3_POSE)
-        #
-        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        # raw_input()
-        # tutorial.go_to_pose(BOX_4_POSE)
-        #
-        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        # raw_input()
-        # tutorial.go_to_pose(BOX_5_POSE)
-        #
-        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        # raw_input()
-        # tutorial.go_to_pose(BOX_6_POSE)
-        #
-        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        # raw_input()
-        # tutorial.go_to_pose(BOX_7_POSE)
-        #
-        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        # raw_input()
-        # tutorial.go_to_pose(BOX_DST_POSE)
-        #
-        # print "============ Press `Enter` to execute a movement using a joint state goal ..."
-        # raw_input()
-        # tutorial.go_to_pose(UP_POSE)
+        print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        raw_input()
+        tutorial.go_to_pose(BOX_2_POSE)
+
+        print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        raw_input()
+        tutorial.go_to_pose(BOX_3_POSE)
+
+        print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        raw_input()
+        tutorial.go_to_pose(BOX_4_POSE)
+
+        print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        raw_input()
+        tutorial.go_to_pose(BOX_5_POSE)
+
+        print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        raw_input()
+        tutorial.go_to_pose(BOX_6_POSE)
+
+        print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        raw_input()
+        tutorial.go_to_pose(BOX_7_POSE)
+
+        print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        raw_input()
+        tutorial.go_to_pose(BOX_DST_POSE)
+
+        print "============ Press `Enter` to execute a movement using a joint state goal ..."
+        raw_input()
+        tutorial.go_to_pose(UP_POSE)
+
+
 
         # print "============ Press `Enter` to plan and display a Cartesian path ..."
         # raw_input()

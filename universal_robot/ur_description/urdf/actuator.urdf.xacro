@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<robot name="actuator" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <link name="base_plexi">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="0.008" radius="0.031"/>
+            </geometry>
+            <material name="white">
+                <color rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder length="0.008" radius="0.031"/>
+            </geometry>
+        </collision>
+    </link>
+    <link name="base_plexi_2">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="0.008" radius="0.031"/>
+            </geometry>
+            <material name="white">
+                <color rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder length="0.008" radius="0.031"/>
+            </geometry>
+        </collision>
+    </link>
+    <link name="venturi">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <visual>
+            <geometry>
+                <box size="0.038 0.038 .020"/>
+            </geometry>
+            <material name="black">
+                <color rgba="0 0 0 1"/>
+            </material>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.038 0.038 .020"/>
+            </geometry>
+        </collision>
+    </link>
+    <link name="ventouse">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <visual>
+            <geometry>
+                <cylinder length="0.025" radius="0.014"/>
+            </geometry>
+            <material name="blue">
+                <color rgba="0 0 .5 1"/>
+            </material>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder length="0.025" radius="0.014"/>
+            </geometry>
+        </collision>
+    </link>
+    <joint name="base_plexi_to_base_plexi_2" type="fixed">
+        <parent link="base_plexi"/>
+        <child link="base_plexi_2"/>
+        <origin xyz="0 0 0.008 "/>
+    </joint>
+    <joint name="base_plexi_2_to_venturi" type="fixed">
+        <parent link="base_plexi_2"/>
+        <child link="venturi"/>
+        <origin xyz="0 0 0.014 "/>
+    </joint>
+    <joint name="adapteur_to_ventouse" type="fixed">
+        <parent link="venturi"/>
+        <child link="ventouse"/>
+        <origin xyz="0.0 0.0 0.0225 "/>
+    </joint>
+</robot>
