@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<robot name="actuateur">
+<robot name="box">
   <link name="base">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>

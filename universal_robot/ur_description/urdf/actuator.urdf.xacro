@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <robot name="actuator" xmlns:xacro="http://ros.org/wiki/xacro">
 
-    <link name="base_plexi">
+    <link name="base_plexi_link">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
@@ -17,7 +17,7 @@
             </geometry>
         </collision>
     </link>
-    <link name="base_plexi_2">
+    <link name="base_plexi_2_link">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
@@ -33,7 +33,7 @@
             </geometry>
         </collision>
     </link>
-    <link name="venturi">
+    <link name="venturi_link">
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <visual>
             <geometry>
@@ -49,7 +49,7 @@
             </geometry>
         </collision>
     </link>
-    <link name="ventouse">
+    <link name="suction_pad_link">
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <visual>
             <geometry>
@@ -65,19 +65,19 @@
             </geometry>
         </collision>
     </link>
-    <joint name="base_plexi_to_base_plexi_2" type="fixed">
-        <parent link="base_plexi"/>
-        <child link="base_plexi_2"/>
+    <joint name="base_plexi_joint" type="fixed">
+        <parent link="base_plexi_link"/>
+        <child link="base_plexi_2_link"/>
         <origin xyz="0 0 0.008 "/>
     </joint>
-    <joint name="base_plexi_2_to_venturi" type="fixed">
-        <parent link="base_plexi_2"/>
-        <child link="venturi"/>
+    <joint name="base_plexi_2_joint" type="fixed">
+        <parent link="base_plexi_2_link"/>
+        <child link="venturi_link"/>
         <origin xyz="0 0 0.014 "/>
     </joint>
-    <joint name="adapteur_to_ventouse" type="fixed">
-        <parent link="venturi"/>
-        <child link="ventouse"/>
+    <joint name="venturi_joint" type="fixed">
+        <parent link="venturi_link"/>
+        <child link="suction_pad_link"/>
         <origin xyz="0.0 0.0 0.0225 "/>
     </joint>
 </robot>
