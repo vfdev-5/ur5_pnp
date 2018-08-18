@@ -25,4 +25,4 @@ source devel/setup.bash
 roslaunch ur5_moveit_config demo.launch
 ```
 
-![rviz](assets/rviz_demo.png)
+![rviz](assets/rviz_demo_v2.png)
