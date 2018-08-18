@@ -3,6 +3,7 @@
 import sys
 import copy
 import rospy
+import signal
 import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
@@ -13,9 +14,11 @@ from math import pi
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 
+from autolab_core import YamlConfig
 from visualization import Visualizer2D as vis
 from gqcnn.msg import GQCNNGrasp, BoundingBox
 from gqcnn.srv import GQCNNGraspPlanner
+from perception import RgbdDetectorFactory, RgbdSensorFactory
 
 
 # Poses to boxes + Up state pose
@@ -68,6 +71,8 @@ class PickAndDropProgram(object):
         moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node('pick_and_drop_program', anonymous=True)
 
+        config = YamlConfig(rospy.get_param('~config'))
+
         # Instantiate a `RobotCommander`_ object. This object is the outer-level interface to
         # the robot:
         robot = moveit_commander.RobotCommander()
@@ -91,31 +96,48 @@ class PickAndDropProgram(object):
 
         # We can get the name of the reference frame for this robot:
         planning_frame = group.get_planning_frame()
-        print "============ Reference frame: %s" % planning_frame
+        print("============ Reference frame: %s" % planning_frame)
 
-        # We can also print the name of the end-effector link for this group:
+        # We can also print(the name of the end-effector link for this group:
         eef_link = group.get_end_effector_link()
-        print "============ End effector: %s" % eef_link
+        print("============ End effector: %s" % eef_link)
 
         # We can get a list of all the groups in the robot:
         group_names = robot.get_group_names()
-        print "============ Robot Groups:", robot.get_group_names()
+        print("============ Robot Groups:", robot.get_group_names())
 
         # Sometimes for debugging it is useful to print the entire state of the
         # robot:
-        print "============ Printing robot state"
-        print robot.get_current_state()
-        print ""
+        print("============ Printing robot state")
+        print(robot.get_current_state())
+        print("")
+
+        # Setup vision sensor
+        print("============ Setup vision sensor")
+        # create rgbd sensor
+        rospy.loginfo('Creating RGBD Sensor')
+        sensor_cfg = config['sensor_cfg']
+        sensor_type = sensor_cfg['type']
+        self.sensor = RgbdSensorFactory.sensor(sensor_type, sensor_cfg)
+        self.sensor.start()
+        rospy.loginfo('Sensor Running')
+
+        rospy.loginfo('Loading T_camera_world')
+        T_camera_world = RigidTransform.load('~sensor_to_world_tf')
+
+
+        # Setup client for grasp pose service
+        rospy.loginfo('Setup client for grasp pose service')
+        rospy.wait_for_service('grasp_policy')
+        self.plan_grasp_client = rospy.ServiceProxy('grasp_policy', GQCNNGraspPlanner)
 
         # Misc variables
-        self.box_name = ''
         self.robot = robot
         self.scene = scene
         self.group = group
-        self.display_trajectory_publisher = display_trajectory_publisher
-        self.planning_frame = planning_frame
-        self.eef_link = eef_link
         self.group_names = group_names
+        self.config = config
+        self.T_camera_world = T_camera_world
 
     def go_to_pose(self, pose_goal):
         # Copy class variables to local variables to make the web tutorials more clear.
@@ -140,11 +162,52 @@ class PickAndDropProgram(object):
         current_pose = self.group.get_current_pose().pose
         return all_close(pose_goal, current_pose, 0.01)
 
+    def compute_object_pose(self):
+        # get the images from the sensor
+        color_image, depth_image, _ = self.sensor.frames()
+        # inpaint to remove holes
+        inpainted_color_image = color_image.inpaint(rescale_factor=self.config['inpaint_rescale_factor'])
+        inpainted_depth_image = depth_image.inpaint(rescale_factor=self.config['inpaint_rescale_factor'])
+
+        detector_cfg = self.config['detector']
+        camera_intrinsics = self.sensor.ir_intrinsics
+
+        detector = RgbdDetectorFactory.detector('point_cloud_box')
+        detection = detector.detect(inpainted_color_image, inpainted_depth_image, 
+            detector_cfg,
+            camera_intrinsics,
+            self.T_camera_world,
+            vis_foreground=True, 
+            vis_segmentation=True)[0]
+
+        boundingBox = BoundingBox()
+        boundingBox.minY = detection.bounding_box.min_pt[0]
+        boundingBox.minX = detection.bounding_box.min_pt[1]
+        boundingBox.maxY = detection.bounding_box.max_pt[0]
+        boundingBox.maxX = detection.bounding_box.max_pt[1]
+
+        try:
+            start_time = time.time()
+            planned_grasp_data = plan_grasp(inpainted_color_image.rosmsg, inpainted_depth_image.rosmsg, camera_intrinsics.rosmsg, boundingBox)
+            grasp_plan_time = time.time() - start_time
+        except rospy.ServiceException as e:
+            rospy.logerr("Service call failed: \n %s" % e)  
+
+        return planned_grasp_data.pose
 
 def main():
 
     try:
         program = PickAndDropProgram()
+
+        # setup safe termination
+        def handler(signum, frame):
+            rospy.loginfo('Caught CTRL+C, exiting...')        
+            if program.sensor is not None:
+                program.sensor.stop()
+            exit(0)
+        signal.signal(signal.SIGINT, handler)
+
 
         # print("============ Press `Enter` to initialize pose")
         # raw_input()
@@ -152,6 +215,11 @@ def main():
 
         is_running = False
         while is_running:
+
+            print("============ Press `Enter` to get object pose ...")
+            raw_input()
+            object_pose = program.compute_object_pose()
+
             print("============ Press `Enter` to go to near box pose ...")
             raw_input()
             program.go_to_pose(NEAR_BOX_POSE)
@@ -162,7 +230,7 @@ def main():
 
             print("============ Press `Enter` to go to pick object pose ...")
             raw_input()
-            program.go_to_pose(PICK_OBJ_POSE)
+            program.go_to_pose(object_pose)
 
             print("============ Press `Enter` to go to near box pose ...")
             raw_input()
@@ -182,7 +250,7 @@ def main():
                 is_running = False
 
         program.go_to_pose(UP_POSE)
-        print "============ Program complete!"
+        print("============ Program complete!")
 
     except rospy.ROSInterruptException:
         return
