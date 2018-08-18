@@ -1,39 +1,21 @@
-# MoveIt! MoveGroup tutorial for UR5 (python interface)
+# Demo programs for UR5 Pick and Drop project
 
-Adaptation of [MoveIt! MoveGroup tutorial for Panda](https://github.com/ros-planning/moveit_tutorials/blob/kinetic-devel/doc/move_group_python_interface/)
+## Programs
 
-## Installation
+Folder `programs` contains script to execute various demo programs. 
 
-We need to use fixed URDF/SRDF universal_robotics package (see [here](https://github.com/ros-industrial/universal_robot/pull/284)).
-Thus, we use a custom `universal_robot` repository.
+### Go over boxes
 
-``` 
-mkdir -p ur5_ws/src && cd ur5_ws/src
-git clone https://github.com/vfdev-5/universal_robot
-git clone https://github.com/vfdev-5/move_group_tutorial_ur5.git
-cd ../ & catkin_make
-```
+Script `automate_go_over_boxed.py` moves the robot to predefined poses
+which indicates poses over 7 + 1 boxes of the project
 
-we need also to fix problem with `pyassimp`:
-```
-pip install --upgrade pyassimp
-```
+### Pick and drop single object
 
-Install other dependencies:
-```
-cd ur5_ws/ && rosdep install --from-paths src --ignore-src -r -y
-```
+Script `automate_pick_and_drop_single_object.py` executes an program to move the robot 
+to the predefined poses such that it picks a fixed placed object from the source box and 
+drop it in the destination box.
 
-## Usage:
 
-Terminal 1
-```
-cd ur5_ws && source devel/setup.bash
-roslaunch ur5_moveit_config demo.launch limited:=true
-```
+## Credits
 
-Terminal 2
-```
-cd ur5_ws && source devel/setup.bash
-python src/move_group_tutorial_ur5/src/move_group_tutorial_ur5.py
-```
+Code is based on [MoveIt! MoveGroup tutorial for Panda](https://github.com/ros-planning/moveit_tutorials/blob/kinetic-devel/doc/move_group_python_interface/)

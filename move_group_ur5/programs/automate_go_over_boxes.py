@@ -472,8 +472,6 @@ def main():
         raw_input()
         tutorial.go_to_pose(UP_POSE)
 
-
-
         # print "============ Press `Enter` to plan and display a Cartesian path ..."
         # raw_input()
         # cartesian_plan, fraction = tutorial.plan_cartesian_path()
