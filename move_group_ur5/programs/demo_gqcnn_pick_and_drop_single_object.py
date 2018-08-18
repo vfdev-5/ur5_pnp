@@ -13,6 +13,11 @@ from math import pi
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 
+from visualization import Visualizer2D as vis
+from gqcnn.msg import GQCNNGrasp, BoundingBox
+from gqcnn.srv import GQCNNGraspPlanner
+
+
 # Poses to boxes + Up state pose
 UP_POSE = geometry_msgs.msg.Pose(
     position=Point(-0.44995, 0.155801542599, 1.02605862083),
@@ -139,15 +144,13 @@ class PickAndDropProgram(object):
 def main():
 
     try:
-        print "============ Press `Enter` to begin the tutorial by setting up the moveit_commander (press ctrl-d to exit) ..."
-        raw_input()
         program = PickAndDropProgram()
 
-        print("============ Press `Enter` to initialize pose")
-        raw_input()
-        program.go_to_pose(UP_POSE)
+        # print("============ Press `Enter` to initialize pose")
+        # raw_input()
+        # program.go_to_pose(UP_POSE)
 
-        is_running = True
+        is_running = False
         while is_running:
             print("============ Press `Enter` to go to near box pose ...")
             raw_input()

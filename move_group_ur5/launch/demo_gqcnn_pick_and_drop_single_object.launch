@@ -1,0 +1,14 @@
+<launch>
+  <!-- Namespace for the node and services -->
+  <arg name="ns"  default="ur5_pnp_demo" />
+  
+  <arg name="config" default="$(find move_group_ur5)/cfg/demo_gqcnn_pick_and_drop_single_object.yaml" />
+  
+  <node name="demo_gqcnn_pick_and_drop"  
+    pkg="move_group_ur5" 
+    type="demo_gqcnn_pick_and_drop_single_object.py" 
+    output="screen" >
+    	<param name="config" value="$(arg config)" />
+  </node>
+
+</launch>

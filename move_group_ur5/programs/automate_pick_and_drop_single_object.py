@@ -139,8 +139,6 @@ class PickAndDropProgram(object):
 def main():
 
     try:
-        print "============ Press `Enter` to begin the tutorial by setting up the moveit_commander (press ctrl-d to exit) ..."
-        raw_input()
         program = PickAndDropProgram()
 
         print("============ Press `Enter` to initialize pose")

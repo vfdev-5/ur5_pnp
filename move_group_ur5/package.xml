@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>move_group_tutorial_ur5</name>
+  <name>move_group_ur5</name>
   <version>0.0.0</version>
-  <description>The move_group_tutorial_ur5 package</description>
+  <description>UR5 Pick and plane programs</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

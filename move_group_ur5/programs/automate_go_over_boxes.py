@@ -414,8 +414,6 @@ class MoveGroupTutorial(object):
 def main():
 
     try:
-        print "============ Press `Enter` to begin the tutorial by setting up the moveit_commander (press ctrl-d to exit) ..."
-        raw_input()
         tutorial = MoveGroupTutorial()
 
         print "============ Press `Enter` to execute a movement using a joint state goal ..."
