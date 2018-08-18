@@ -1,103 +1,139 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<robot name="box">
-  <link name="base">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.37 0.245 .01"/>
-      </geometry>
-      <material name="mat1">
-        <color rgba="1 1 1 1"/>
-      </material>
-    </visual>
-    <collision>
-      <geometry>
-        <box size="0.37 0.245 .01"/>
-      </geometry>
-    </collision>
-  </link>
-  <link name="left">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.37 0.01 .15"/>
-      </geometry>
-      <material name="mat2">
-        <color rgba="1 0 1 1"/>
-      </material>
-    </visual>
-    <collision>
-      <geometry>
-        <box size="0.37 0.01 .15"/>
-      </geometry>
-    </collision>
-  </link>
-  <link name="right">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.37 0.01 .15"/>
-      </geometry>
-      <material name="mat3">
-        <color rgba="1 1 0 1"/>
-      </material>
-    </visual>
-    <collision>
-      <geometry>
-        <box size="0.37 0.01 .15"/>
-      </geometry>
-    </collision>
-  </link>
-  <link name="top">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.01 0.245 .15"/>
-      </geometry>
-      <material name="mat4">
-        <color rgba="0 1 1 1"/>
-      </material>
-    </visual>
-    <collision>
-      <geometry>
-        <box size="0.01 0.245 .15"/>
-      </geometry>
-    </collision>
-  </link>
-  <link name="bottom">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.01 0.245 .15"/>
-      </geometry>
-      <material name="mat5">
-        <color rgba="0 0 1 1"/>
-      </material>
-    </visual>
-    <collision>
-      <geometry>
-        <box size="0.01 0.245 .15"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="base_to_left" type="fixed">
-    <parent link="base"/>
-    <child link="left"/>
-    <origin xyz="0 -0.122 0.075 "/>
-  </joint>
-  <joint name="base_to_right" type="fixed">
-    <parent link="base"/>
-    <child link="right"/>
-    <origin xyz="0 0.122 0.075 "/>
-  </joint>
-  <joint name="base_to_top" type="fixed">
-    <parent link="base"/>
-    <child link="top"/>
-    <origin xyz="0.185 0.0 0.075 "/>
-  </joint>
-  <joint name="base_to_bottom" type="fixed">
-    <parent link="base"/>
-    <child link="bottom"/>
-    <origin xyz="-0.185 0.0 0.075 "/>
-  </joint>
+<robot name="box" xmlns:xacro="http://ros.org/wiki/xacro">
+ 
+  <!-- Box plastic depth -->
+  <xacro:property name="box_side_depth" value="0.01" />
+
+  <!-- Definitions of box source dimensions  -->
+  <xacro:property name="src_box_w" value="0.37" />
+  <xacro:property name="src_box_h" value="0.245" />
+  <xacro:property name="src_box_z" value="0.15" />
+
+  <!-- Definitions of box destination dimensions  -->
+  <xacro:property name="dst_box_w" value="0.33" />
+  <xacro:property name="dst_box_h" value="0.255" />
+  <xacro:property name="dst_box_z" value="0.10" />
+
+
+  <material name="bscolor">
+    <color rgba="1 1 1 0.85"/>
+  </material>
+
+
+  <xacro:macro name="generic_box"
+    params="prefix bsw bsh bsz depth">
+
+    <link name="${prefix}_base">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${bsw} ${bsh} ${depth}"/>
+        </geometry>
+        <material name="bscolor" />
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${bsw} ${bsh} ${depth}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="${prefix}_left">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${bsw} ${depth} ${bsz}"/>
+        </geometry>
+        <material name="bscolor" />
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${bsw} ${depth} ${bsz}"/>
+        </geometry>
+      </collision>
+    </link>
+    <link name="${prefix}_right">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${bsw} ${depth} ${bsz}"/>
+        </geometry>
+        <material name="bscolor" />
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${bsw} ${depth} ${bsz}"/>
+        </geometry>
+      </collision>
+    </link>
+    <link name="${prefix}_top">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${depth} ${bsh} ${bsz}"/>
+        </geometry>
+        <material name="bscolor" />
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${depth} ${bsh} ${bsz}"/>
+        </geometry>
+      </collision>
+    </link>
+    <link name="${prefix}_bottom">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${depth} ${bsh} ${bsz}"/>
+        </geometry>
+        <material name="bscolor" />
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${depth} ${bsh} ${bsz}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_base_to_left" type="fixed">
+      <parent link="${prefix}_base"/>
+      <child link="${prefix}_left"/>
+      <origin xyz="0.0 -${bsh * 0.5 - depth * 0.5} ${bsz * 0.5 - depth * 0.5}"/>
+    </joint>
+    <joint name="${prefix}_base_to_right" type="fixed">
+      <parent link="${prefix}_base"/>
+      <child link="${prefix}_right"/>
+      <origin xyz="0.0 ${bsh * 0.5 - depth * 0.5} ${bsz * 0.5 - depth * 0.5}"/>
+    </joint>
+    <joint name="${prefix}_base_to_top" type="fixed">
+      <parent link="${prefix}_base"/>
+      <child link="${prefix}_top"/>
+      <origin xyz="${bsw * 0.5 - depth * 0.5} 0.0 ${bsz * 0.5 - depth * 0.5}"/>
+    </joint>
+    <joint name="${prefix}_base_to_bottom" type="fixed">
+      <parent link="${prefix}_base"/>
+      <child link="${prefix}_bottom"/>
+      <origin xyz="-${bsw * 0.5 - depth * 0.5} 0.0 ${bsz * 0.5 - depth * 0.5}"/>
+    </joint>
+  
+  </xacro:macro>
+
+  <xacro:macro name="box_source" params="name">
+    <xacro:generic_box 
+      prefix="${name}" 
+      bsw="${src_box_w}" 
+      bsh="${src_box_h}" 
+      bsz="${src_box_z}" 
+      depth="${box_side_depth}"/>  
+  </xacro:macro>
+
+  <xacro:macro name="box_destination" params="name">
+    <xacro:generic_box 
+      prefix="${name}"
+      bsw="${dst_box_w}" 
+      bsh="${dst_box_h}"
+      bsz="${dst_box_z}"
+      depth="${box_side_depth}"/>  
+  </xacro:macro>
+
 </robot>
