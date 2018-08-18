@@ -1,0 +1,13 @@
+[submodule "berkeley_automation/autolab_core"]
+	path = berkeley_automation/autolab_core
+	url = https://github.com/BerkeleyAutomation/autolab_core
+[submodule "berkeley_automation/perception"]
+	path = berkeley_automation/perception
+	url = https://github.com/BerkeleyAutomation/perception
+[submodule "berkeley_automation/visualization"]
+	path = berkeley_automation/visualization
+	url = https://github.com/BerkeleyAutomation/visualization
+[submodule "berkeley_automation/gqcnn"]
+	path = berkeley_automation/gqcnn
+	url = https://github.com/BerkeleyAutomation/gqcnn
+	branch = merge-jeff

@@ -13,7 +13,7 @@ Panels:
         - /MotionPlanning1/Planning Metrics1
         - /MotionPlanning1/Planned Path1
       Splitter Ratio: 0.5
-    Tree Height: 369
+    Tree Height: 469
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -384,7 +384,7 @@ Visualization Manager:
         Interactive Marker Size: 0.150000006
         Joint Violation Color: 255; 0; 255
         Planning Group: manipulator
-        Query Goal State: true
+        Query Goal State: false
         Query Start State: false
         Show Workspace: true
         Start State Alpha: 1
@@ -712,25 +712,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.41822481
+      Distance: 2.36602235
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.702814043
-        Y: 0.50036478
-        Z: 0.244198099
+        X: -0.55895406
+        Y: 0.433685362
+        Z: 0.445297927
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.529794037
+      Pitch: 0.444794118
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.85675085
+      Yaw: 2.19175363
     Saved: ~
 Window Geometry:
   Displays:
