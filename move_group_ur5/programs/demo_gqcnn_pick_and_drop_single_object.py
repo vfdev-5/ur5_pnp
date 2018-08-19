@@ -237,7 +237,7 @@ class PickAndDropProgram(object):
 
             grasp_world_pose = tf2_geometry_msgs.do_transform_pose(grasp_camera_pose, camera_world_transform)
             rospy.loginfo("World CS planned_grasp_data:\n{}".format(grasp_world_pose))
-            return grasp_world_pose
+            return grasp_world_pose.pose
 
         except rospy.ServiceException as e:
             rospy.logerr("Service call failed: \n %s" % e)
