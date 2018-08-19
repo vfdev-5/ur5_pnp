@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 
 import sys
-import copy
+import time
 import rospy
 import signal
 import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
 from geometry_msgs.msg import Point, Quaternion
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
-import numpy as np
-from math import pi
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 
@@ -19,24 +16,25 @@ from visualization import Visualizer2D as vis
 from gqcnn.msg import GQCNNGrasp, BoundingBox
 from gqcnn.srv import GQCNNGraspPlanner
 from perception import RgbdDetectorFactory, RgbdSensorFactory
+from autolab_core import RigidTransform
 
 
 # Poses to boxes + Up state pose
 UP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-0.44995, 0.155801542599, 1.02605862083),
-    orientation=Quaternion(0.707106556984, -0.000563088017201, -0.707106556987, 0.000563088010273))
+    position=Point(-0.449950653489, 0.153568188908, 1.02605729047),
+    orientation=Quaternion(0.707106942096, 0.00138902387142, -0.707105197035, 0.000288751707593))
 
 NEAR_BOX_POSE = geometry_msgs.msg.Pose(
-    position=Point(-0.675139039609, 0.867279417402, 0.279982326596),
-    orientation=Quaternion(-0.868894712561, 0.48837298469, 0.0705417807789, 0.0392130523262))
+    position=Point(-0.614939679324, 0.790413164373, 0.415621245712),
+    orientation=Quaternion(-0.834487869007, 0.542014105967, 0.0922862026742, 0.0365234473799))
 
 DROP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-1.09533408607, 0.336971544257, 0.205691443581),
-    orientation=Quaternion(-0.184521466167, -0.9803796679, 0.0115032200886, 0.0683755162301))
+    position=Point(-1.06662176303, 0.346077654481, 0.198067617558),
+    orientation=Quaternion(0.982402036041, -0.174350458574, -0.0663691294532, 0.00912665511809))
 
 PICK_OBJ_POSE = geometry_msgs.msg.Pose(
-    position=Point(-0.68115685593, 0.876995807511, 0.10939952704),
-    orientation=Quaternion(-0.871625146062, 0.490012399741, 0.0111440867713, 0.005767337592))
+    position=Point(-0.642289704372, 0.860504795885, 0.169978001448),
+    orientation=Quaternion(0.836061431182, -0.548183178976, -0.0071903762015, 0.0210899043991))
 
 
 def all_close(goal, actual, tolerance):
@@ -47,7 +45,6 @@ def all_close(goal, actual, tolerance):
     @param: tolerance  A float
     @returns: bool
     """
-    all_equal = True
     if type(goal) is list:
         for index in range(len(goal)):
             if abs(actual[index] - goal[index]) > tolerance:
@@ -71,6 +68,11 @@ class PickAndDropProgram(object):
         moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node('pick_and_drop_program', anonymous=True)
 
+        # Declare suctionpad topics
+        self.pub_to = rospy.Publisher('toArduino', String, queue_size=100)
+        self.pub_from = rospy.Publisher('fromArduino', String, queue_size=100)
+
+        # Vision config
         config = YamlConfig(rospy.get_param('~config'))
 
         # Instantiate a `RobotCommander`_ object. This object is the outer-level interface to
@@ -125,11 +127,10 @@ class PickAndDropProgram(object):
         rospy.loginfo('Loading T_camera_world')
         T_camera_world = RigidTransform.load('~sensor_to_world_tf')
 
-
         # Setup client for grasp pose service
         rospy.loginfo('Setup client for grasp pose service')
-        rospy.wait_for_service('grasp_policy')
-        self.plan_grasp_client = rospy.ServiceProxy('grasp_policy', GQCNNGraspPlanner)
+        rospy.wait_for_service('grasping_policy')
+        self.plan_grasp_client = rospy.ServiceProxy('grasping_policy', GQCNNGraspPlanner)
 
         # Misc variables
         self.robot = robot
@@ -162,7 +163,15 @@ class PickAndDropProgram(object):
         current_pose = self.group.get_current_pose().pose
         return all_close(pose_goal, current_pose, 0.01)
 
+    def turn_on_suction_pad(self):
+        self.pub_to.publish("SUCKER:ON")
+
+    def turn_off_suction_pad(self):
+        self.pub_to.publish("SUCKER:OFF")
+
     def compute_object_pose(self):
+
+        camera_intrinsics = self.sensor.ir_intrinsics
         # get the images from the sensor
         color_image, depth_image, _ = self.sensor.frames()
         # inpaint to remove holes
@@ -170,15 +179,14 @@ class PickAndDropProgram(object):
         inpainted_depth_image = depth_image.inpaint(rescale_factor=self.config['inpaint_rescale_factor'])
 
         detector_cfg = self.config['detector']
-        camera_intrinsics = self.sensor.ir_intrinsics
 
         detector = RgbdDetectorFactory.detector('point_cloud_box')
-        detection = detector.detect(inpainted_color_image, inpainted_depth_image, 
-            detector_cfg,
-            camera_intrinsics,
-            self.T_camera_world,
-            vis_foreground=True, 
-            vis_segmentation=True)[0]
+        detection = detector.detect(inpainted_color_image, inpainted_depth_image,
+                                    detector_cfg,
+                                    camera_intrinsics,
+                                    self.T_camera_world,
+                                    vis_foreground=True,
+                                    vis_segmentation=True)[0]
 
         boundingBox = BoundingBox()
         boundingBox.minY = detection.bounding_box.min_pt[0]
@@ -188,61 +196,65 @@ class PickAndDropProgram(object):
 
         try:
             start_time = time.time()
-            planned_grasp_data = plan_grasp(inpainted_color_image.rosmsg, inpainted_depth_image.rosmsg, camera_intrinsics.rosmsg, boundingBox)
+            planned_grasp_data = self.plan_grasp_client(inpainted_color_image.rosmsg, inpainted_depth_image.rosmsg, camera_intrinsics.rosmsg, boundingBox)
             grasp_plan_time = time.time() - start_time
+            rospy.loginfo("Planning time: {}".format(grasp_plan_time))
+            rospy.loginfo("planned_grasp_data:\n{}".format(planned_grasp_data.grasp.pose))
+            return planned_grasp_data.grasp.pose
         except rospy.ServiceException as e:
-            rospy.logerr("Service call failed: \n %s" % e)  
+            rospy.logerr("Service call failed: \n %s" % e)
+            return None
 
-        return planned_grasp_data.pose
 
 def main():
 
     try:
         program = PickAndDropProgram()
 
-        # setup safe termination
-        def handler(signum, frame):
-            rospy.loginfo('Caught CTRL+C, exiting...')        
-            if program.sensor is not None:
-                program.sensor.stop()
-            exit(0)
-        signal.signal(signal.SIGINT, handler)
+        print("============ Press `Enter` to initialize pose")
+        raw_input()
+        program.go_to_pose(UP_POSE)
 
-
-        # print("============ Press `Enter` to initialize pose")
-        # raw_input()
-        # program.go_to_pose(UP_POSE)
-
-        is_running = False
+        is_running = True
+        vision_fail_counter = 5
         while is_running:
 
             print("============ Press `Enter` to get object pose ...")
             raw_input()
             object_pose = program.compute_object_pose()
+            if object_pose is None:
+                vision_fail_counter -= 1
+                if vision_fail_counter == 0:
+                    is_running = False
+                continue
+            else:
+                vision_fail_counter = 5
 
-            print("============ Press `Enter` to go to near box pose ...")
-            raw_input()
-            program.go_to_pose(NEAR_BOX_POSE)
-
-            print("============ Press `Enter` to turn on suction pad ...")
-            raw_input()
-            # turn on suction pad
-
-            print("============ Press `Enter` to go to pick object pose ...")
-            raw_input()
-            program.go_to_pose(object_pose)
-
-            print("============ Press `Enter` to go to near box pose ...")
-            raw_input()
-            program.go_to_pose(NEAR_BOX_POSE)
-
-            print("============ Press `Enter` to go to drop pose ...")
-            raw_input()
-            program.go_to_pose(DROP_POSE)
-
-            print("============ Press `Enter` to turn off suction pad ...")
-            raw_input()
-            # turn off suction pad
+            # print("============ Press `Enter` to go to near box pose ...")
+            # raw_input()
+            # program.go_to_pose(NEAR_BOX_POSE)
+            #
+            # print("============ Press `Enter` to turn on suction pad ...")
+            # raw_input()
+            # # turn on suction pad
+            # program.turn_on_suction_pad()
+            #
+            # print("============ Press `Enter` to go to pick object pose ...")
+            # raw_input()
+            # program.go_to_pose(object_pose)
+            #
+            # print("============ Press `Enter` to go to near box pose ...")
+            # raw_input()
+            # program.go_to_pose(NEAR_BOX_POSE)
+            #
+            # print("============ Press `Enter` to go to drop pose ...")
+            # raw_input()
+            # program.go_to_pose(DROP_POSE)
+            #
+            # print("============ Press `Enter` to turn off suction pad ...")
+            # raw_input()
+            # # turn off suction pad
+            # program.turn_off_suction_pad()
 
             print("============ Press `Enter` to continue or `q` to quit ...")
             c = raw_input()
