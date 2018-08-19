@@ -6,8 +6,9 @@ The content of the repository should be cloned into the source of catkin workspa
 ```
 mkdir -p ur5_pnp_ws/src
 cd ur5_pnp_ws/src
-git clone https://github.com/vfdev-5/ur5_pnp.git
-``` 
+git clone --recursive https://github.com/vfdev-5/ur5_pnp.git
+```
+
 Before compilation, install dependencies:
 ```
 cd ur5_pnp_ws && rosdep install --from-paths src --ignore-src -r -y
@@ -19,10 +20,56 @@ cd ur5_pnp_ws && catkin_make
 
 ## Usage 
 
-### Simulation
+### Robot initialization
+
+Two options are possible:
+- simulation
+- real robot
+
+#### Simulation
 ```
 source devel/setup.bash
 roslaunch ur5_moveit_config demo.launch
 ```
 
 ![rviz](assets/rviz_demo_v2.png)
+
+#### Real robot
+Just run the script from the root of the workspace (`build`, `devel`, `src`):
+```
+sh run_robot.sh
+```
+which starts `roscore` and necessary nodes in separate `xterm` windows.
+
+### Play with robot 
+
+Multiple options are possible:
+- execute a program
+- use moveit commander
+
+#### Execute a program
+
+Main demo program can be executed with
+```
+source devel/setup.bash
+roslaunch move_group_ur5 demo_gqcnn_pick_and_drop_single_object.launch
+```
+
+This demo requires `berkeley_automation` module properly installed.
+
+
+There are other demo programs can be found at `move_group_ur5/programs`.
+
+#### Moveit commander
+
+Simply run the script
+```
+sh run_commander.sh
+```
+Next in the command line type:
+```
+> use manipulator
+> current
+> help
+```
+
