@@ -1,0 +1,18 @@
+<launch>
+  <!-- Namespace for the node and services -->
+  <arg name="ns"  default="ur5_pnp_demo" />
+
+  <node name="suction_pad_comm"
+    pkg="rosserial_python"
+    type="serial_node.py"
+    output="screen" >
+    	<param name="port" value="/dev/ttyUSB0" />
+  </node>
+
+  <node name="demo_automate_pick_and_drop"
+    pkg="move_group_ur5" 
+    type="automate_pick_and_drop_single_object.py"
+    output="screen" >
+  </node>
+
+</launch>

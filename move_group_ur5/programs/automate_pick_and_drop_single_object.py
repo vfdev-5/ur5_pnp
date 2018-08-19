@@ -13,22 +13,23 @@ from math import pi
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 
+
 # Poses to boxes + Up state pose
 UP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-0.44995, 0.155801542599, 1.02605862083),
-    orientation=Quaternion(0.707106556984, -0.000563088017201, -0.707106556987, 0.000563088010273))
+    position=Point(-0.449950653489, 0.153568188908, 1.02605729047),
+    orientation=Quaternion(0.707106942096, 0.00138902387142, -0.707105197035, 0.000288751707593))
 
 NEAR_BOX_POSE = geometry_msgs.msg.Pose(
-    position=Point(-0.675139039609, 0.867279417402, 0.279982326596),
-    orientation=Quaternion(-0.868894712561, 0.48837298469, 0.0705417807789, 0.0392130523262))
+    position=Point(-0.614939679324, 0.790413164373, 0.415621245712),
+    orientation=Quaternion(-0.834487869007, 0.542014105967, 0.0922862026742, 0.0365234473799))
 
 DROP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-1.09533408607, 0.336971544257, 0.205691443581),
-    orientation=Quaternion(-0.184521466167, -0.9803796679, 0.0115032200886, 0.0683755162301))
+    position=Point(-1.06662176303, 0.346077654481, 0.198067617558),
+    orientation=Quaternion(0.982402036041, -0.174350458574, -0.0663691294532, 0.00912665511809))
 
 PICK_OBJ_POSE = geometry_msgs.msg.Pose(
-    position=Point(-0.68115685593, 0.876995807511, 0.10939952704),
-    orientation=Quaternion(-0.871625146062, 0.490012399741, 0.0111440867713, 0.005767337592))
+    position=Point(-0.642289704372, 0.860504795885, 0.169978001448),
+    orientation=Quaternion(0.836061431182, -0.548183178976, -0.0071903762015, 0.0210899043991))
 
 
 def all_close(goal, actual, tolerance):
@@ -39,7 +40,6 @@ def all_close(goal, actual, tolerance):
     @param: tolerance  A float
     @returns: bool
     """
-    all_equal = True
     if type(goal) is list:
         for index in range(len(goal)):
             if abs(actual[index] - goal[index]) > tolerance:
@@ -62,6 +62,10 @@ class PickAndDropProgram(object):
         # First initialize `moveit_commander`_ and a `rospy`_ node:
         moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node('pick_and_drop_program', anonymous=True)
+
+        # Declare suctionpad topics
+        self.pub_to = rospy.Publisher('toArduino', String, queue_size=100)
+        self.pub_from = rospy.Publisher('fromArduino', String, queue_size=100)
 
         # Instantiate a `RobotCommander`_ object. This object is the outer-level interface to
         # the robot:
@@ -135,6 +139,12 @@ class PickAndDropProgram(object):
         current_pose = self.group.get_current_pose().pose
         return all_close(pose_goal, current_pose, 0.01)
 
+    def turn_on_suction_pad(self):
+        self.pub_to.publish("SUCKER:ON")
+
+    def turn_off_suction_pad(self):
+        self.pub_to.publish("SUCKER:OFF")
+
 
 def main():
 
@@ -154,6 +164,7 @@ def main():
             print("============ Press `Enter` to turn on suction pad ...")
             raw_input()
             # turn on suction pad
+            program.turn_on_suction_pad()
 
             print("============ Press `Enter` to go to pick object pose ...")
             raw_input()
@@ -170,6 +181,7 @@ def main():
             print("============ Press `Enter` to turn off suction pad ...")
             raw_input()
             # turn off suction pad
+            program.turn_off_suction_pad()
 
             print("============ Press `Enter` to continue or `q` to quit ...")
             c = raw_input()
