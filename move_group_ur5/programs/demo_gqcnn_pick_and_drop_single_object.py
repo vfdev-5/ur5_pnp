@@ -22,20 +22,20 @@ from autolab_core import RigidTransform
 
 # Poses to boxes + Up state pose
 UP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-0.449950653489, 0.153568188908, 1.02605729047),
-    orientation=Quaternion(0.707106942096, 0.00138902387142, -0.707105197035, 0.000288751707593))
+    position=Point(-0.449776958114, 0.146191358556, 1.02599018264),
+    orientation=Quaternion(0.0225368166985, -0.808053659539, -0.588442707886, 0.0166299348762))
 
 NEAR_BOX_POSE = geometry_msgs.msg.Pose(
-    position=Point(-0.614939679324, 0.790413164373, 0.415621245712),
-    orientation=Quaternion(-0.834487869007, 0.542014105967, 0.0922862026742, 0.0365234473799))
+    position=Point(-0.690099627989, 0.81849128041, 0.358930709262),
+    orientation=Quaternion(-0.0262376625131, 0.752089932142, 0.0988363827275, 0.651032927931))
+
+NEAR_DROP_POSE = geometry_msgs.msg.Pose(
+    position=Point(-1.07128657834, 0.320749025386, 0.20939021189),
+    orientation=Quaternion(-0.322710358702, 0.646787770911, 0.332593909725, 0.60572674945))
 
 DROP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-1.06662176303, 0.346077654481, 0.198067617558),
-    orientation=Quaternion(0.982402036041, -0.174350458574, -0.0663691294532, 0.00912665511809))
-
-PICK_OBJ_POSE = geometry_msgs.msg.Pose(
-    position=Point(-0.642289704372, 0.860504795885, 0.169978001448),
-    orientation=Quaternion(0.836061431182, -0.548183178976, -0.0071903762015, 0.0210899043991))
+    position=Point(-1.10543750452, 0.329165925663, 0.111933751523),
+    orientation=Quaternion(-0.297015016999, 0.670153720059, 0.359937433728, 0.577166453434))
 
 
 def all_close(goal, actual, tolerance):
@@ -222,8 +222,8 @@ class PickAndDropProgram(object):
             # create Stamped ROS Transform
             camera_world_transform = TransformStamped()
             camera_world_transform.header.stamp = rospy.Time.now()
-            camera_world_transform.header.frame_id = 'kinect2_camera_frame'
-            camera_world_transform.child_frame_id = 'world'
+            camera_world_transform.header.frame_id = self.tf_camera_world.from_frame
+            camera_world_transform.child_frame_id = self.tf_camera_world.to_frame
 
             camera_world_transform.transform.translation.x = self.tf_camera_world.translation[0]
             camera_world_transform.transform.translation.y = self.tf_camera_world.translation[1]
@@ -253,9 +253,8 @@ def main():
         raw_input()
         program.go_to_pose(UP_POSE)
 
-        is_running = True
         vision_fail_counter = 5
-        while is_running:
+        while True:
 
             print("============ Press `Enter` to get object pose ...")
             raw_input()
@@ -263,42 +262,73 @@ def main():
             if object_pose is None:
                 vision_fail_counter -= 1
                 if vision_fail_counter == 0:
-                    is_running = False
+                    break
                 continue
             else:
                 vision_fail_counter = 5
 
             print("============ Press `Enter` to go to near box pose ...")
-            raw_input()
-            program.go_to_pose(NEAR_BOX_POSE)
+            c = raw_input()
+            if c == 'q':
+                break
+            if not program.go_to_pose(NEAR_BOX_POSE):
+                break
 
             print("============ Press `Enter` to turn on suction pad ...")
-            raw_input()
+            c = raw_input()
+            if c == 'q':
+                break
             # turn on suction pad
             program.turn_on_suction_pad()
 
             print("============ Press `Enter` to go to pick object pose ...")
-            raw_input()
-            program.go_to_pose(object_pose)
+            c = raw_input()
+            if c == 'q':
+                break
+            if not program.go_to_pose(object_pose):
+                break
 
             print("============ Press `Enter` to go to near box pose ...")
-            raw_input()
-            program.go_to_pose(NEAR_BOX_POSE)
+            c = raw_input()
+            if c == 'q':
+                break
+            if not program.go_to_pose(NEAR_BOX_POSE):
+                break
+
+            print("============ Press `Enter` to go to near drop pose ...")
+            c = raw_input()
+            if c == 'q':
+                break
+            if not program.go_to_pose(NEAR_DROP_POSE):
+                break
 
             print("============ Press `Enter` to go to drop pose ...")
-            raw_input()
-            program.go_to_pose(DROP_POSE)
+            c = raw_input()
+            if c == 'q':
+                break
+            if not program.go_to_pose(DROP_POSE):
+                break
 
             print("============ Press `Enter` to turn off suction pad ...")
-            raw_input()
+            c = raw_input()
+            if c == 'q':
+                break
             # turn off suction pad
             program.turn_off_suction_pad()
+
+            print("============ Press `Enter` to go to near drop pose ...")
+            c = raw_input()
+            if c == 'q':
+                break
+            if not program.go_to_pose(NEAR_DROP_POSE):
+                break
 
             print("============ Press `Enter` to continue or `q` to quit ...")
             c = raw_input()
             if c == 'q':
-                is_running = False
+                break
 
+        program.turn_off_suction_pad()
         program.go_to_pose(UP_POSE)
         print("============ Program complete!")
 

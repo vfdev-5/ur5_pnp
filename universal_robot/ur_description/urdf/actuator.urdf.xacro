@@ -1,9 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <robot name="actuator" xmlns:xacro="http://ros.org/wiki/xacro">
 
+    <xacro:property name="half_pi" value="1.57079632679" />
+
     <link name="base_plexi_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 -${half_pi} 0"/>
             <geometry>
                 <cylinder length="0.008" radius="0.031"/>
             </geometry>
@@ -12,6 +14,7 @@
             </material>
         </visual>
         <collision>
+            <origin xyz="0 0 0" rpy="0 -${half_pi} 0"/>
             <geometry>
                 <cylinder length="0.008" radius="0.031"/>
             </geometry>
@@ -19,7 +22,7 @@
     </link>
     <link name="base_plexi_2_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 -${half_pi} 0"/>
             <geometry>
                 <cylinder length="0.008" radius="0.031"/>
             </geometry>
@@ -28,14 +31,15 @@
             </material>
         </visual>
         <collision>
+            <origin xyz="0 0 0" rpy="0 -${half_pi} 0"/>
             <geometry>
                 <cylinder length="0.008" radius="0.031"/>
             </geometry>
         </collision>
     </link>
     <link name="venturi_link">
-        <origin xyz="0 0 0" rpy="0 0 0"/>
         <visual>
+            <origin xyz="0 0 0" rpy="0 -${half_pi} 0"/>
             <geometry>
                 <box size="0.038 0.038 .020"/>
             </geometry>
@@ -44,14 +48,15 @@
             </material>
         </visual>
         <collision>
+            <origin xyz="0 0 0" rpy="0 -${half_pi} 0"/>
             <geometry>
                 <box size="0.038 0.038 .020"/>
             </geometry>
         </collision>
     </link>
     <link name="suction_pad_link">
-        <origin xyz="0 0 0" rpy="0 0 0"/>
         <visual>
+            <origin xyz="0 0 0" rpy="0 -${half_pi} 0"/>
             <geometry>
                 <cylinder length="0.025" radius="0.014"/>
             </geometry>
@@ -60,6 +65,7 @@
             </material>
         </visual>
         <collision>
+            <origin xyz="0 0 0" rpy="0 -${half_pi} 0"/>
             <geometry>
                 <cylinder length="0.025" radius="0.014"/>
             </geometry>
@@ -68,16 +74,16 @@
     <joint name="base_plexi_joint" type="fixed">
         <parent link="base_plexi_link"/>
         <child link="base_plexi_2_link"/>
-        <origin xyz="0 0 0.008 "/>
+        <origin xyz="0.008 0 0 "/>
     </joint>
     <joint name="base_plexi_2_joint" type="fixed">
         <parent link="base_plexi_2_link"/>
         <child link="venturi_link"/>
-        <origin xyz="0 0 0.014 "/>
+        <origin xyz="0.014 0 0 "/>
     </joint>
     <joint name="venturi_joint" type="fixed">
         <parent link="venturi_link"/>
         <child link="suction_pad_link"/>
-        <origin xyz="0.0 0.0 0.0225 "/>
+        <origin xyz="0.0225 0.0 0.0 "/>
     </joint>
 </robot>

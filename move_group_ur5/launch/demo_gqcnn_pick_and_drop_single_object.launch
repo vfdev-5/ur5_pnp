@@ -28,4 +28,15 @@
         <param name="world_camera_tf" value="$(arg world_camera_tf)" />
   </node>
 
+
+  <!--<node pkg="tf"-->
+        <!--type="static_transform_publisher"-->
+        <!--name="world_to_camera"-->
+        <!--args="-0.7 0.945 0.712 0.0 3.14159 0.0 world kinect2_camera_frame2 100"/>-->
+
+  <node name="camera_to_world"  pkg="move_group_ur5" type="camera_world_broadcaster.py" output="screen" >
+        <param name="world_camera_tf"           value="$(arg world_camera_tf)" />
+  </node>
+
+
 </launch>
