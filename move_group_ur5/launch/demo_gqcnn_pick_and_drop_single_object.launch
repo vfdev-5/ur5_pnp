@@ -3,11 +3,10 @@
   <arg name="ns"  default="ur5_pnp_demo" />
   
   <arg name="config" default="$(find move_group_ur5)/cfg/demo_gqcnn_pick_and_drop_single_object.yaml" />
-  <arg name="config" default="$(find move_group_ur5)/cfg/sensor_to_world.tf" />
+  <arg name="world_camera_tf" default="$(find move_group_ur5)/cfg/sensor_to_world.tf" />
   
   <arg name="service_config" default="$(find move_group_ur5)/cfg/grasp_planner_node.suction.yaml" />
-  <arg name="model_dir" default="$(find gqcnn)/models/GQCNN-2.0" />
-
+  <arg name="model_dir" default="$(find gqcnn)/models/GQ-Suction" />
 
   <node name="suction_pad_comm"
     pkg="rosserial_python"
@@ -21,11 +20,12 @@
     	<param name="model_dir"           value="$(arg model_dir)" />
   </node>
 
-  <node name="demo_gqcnn_pick_and_drop"  
-    pkg="move_group_ur5" 
-    type="demo_gqcnn_pick_and_drop_single_object.py" 
+  <node name="demo_gqcnn_pick_and_drop"
+    pkg="move_group_ur5"
+    type="demo_gqcnn_pick_and_drop_single_object.py"
     output="screen" >
     	<param name="config" value="$(arg config)" />
+        <param name="world_camera_tf" value="$(arg world_camera_tf)" />
   </node>
 
 </launch>

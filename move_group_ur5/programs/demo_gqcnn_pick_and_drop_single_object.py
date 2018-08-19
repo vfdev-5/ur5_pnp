@@ -2,14 +2,15 @@
 
 import sys
 import time
+import numpy as np
 import rospy
-import signal
 import moveit_commander
-import moveit_msgs.msg
 import geometry_msgs.msg
 from geometry_msgs.msg import Point, Quaternion
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
+import tf2_geometry_msgs
+from geometry_msgs.msg import TransformStamped
 
 from autolab_core import YamlConfig
 from visualization import Visualizer2D as vis
@@ -60,7 +61,7 @@ def all_close(goal, actual, tolerance):
 
 
 class PickAndDropProgram(object):
-    
+
     def __init__(self):
         super(PickAndDropProgram, self).__init__()
 
@@ -92,9 +93,9 @@ class PickAndDropProgram(object):
 
         # We create a `DisplayTrajectory`_ publisher which is used later to publish
         # trajectories for RViz to visualize:
-        display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path',
-                                                       moveit_msgs.msg.DisplayTrajectory,
-                                                       queue_size=20)
+        # display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path',
+        #                                                moveit_msgs.msg.DisplayTrajectory,
+        #                                                queue_size=20)
 
         # We can get the name of the reference frame for this robot:
         planning_frame = group.get_planning_frame()
@@ -125,7 +126,8 @@ class PickAndDropProgram(object):
         rospy.loginfo('Sensor Running')
 
         rospy.loginfo('Loading T_camera_world')
-        T_camera_world = RigidTransform.load('~sensor_to_world_tf')
+        tf_camera_world = RigidTransform.load(rospy.get_param('~world_camera_tf'))
+        rospy.loginfo('tf_camera_world: {}'.format(tf_camera_world))
 
         # Setup client for grasp pose service
         rospy.loginfo('Setup client for grasp pose service')
@@ -138,7 +140,7 @@ class PickAndDropProgram(object):
         self.group = group
         self.group_names = group_names
         self.config = config
-        self.T_camera_world = T_camera_world
+        self.tf_camera_world = tf_camera_world
 
     def go_to_pose(self, pose_goal):
         # Copy class variables to local variables to make the web tutorials more clear.
@@ -179,14 +181,23 @@ class PickAndDropProgram(object):
         inpainted_depth_image = depth_image.inpaint(rescale_factor=self.config['inpaint_rescale_factor'])
 
         detector_cfg = self.config['detector']
-
+        detector_cfg['image_width'] = inpainted_depth_image.width // 10
+        detector_cfg['image_height'] = inpainted_depth_image.height // 10
         detector = RgbdDetectorFactory.detector('point_cloud_box')
         detection = detector.detect(inpainted_color_image, inpainted_depth_image,
                                     detector_cfg,
                                     camera_intrinsics,
-                                    self.T_camera_world,
-                                    vis_foreground=True,
-                                    vis_segmentation=True)[0]
+                                    self.tf_camera_world,
+                                    vis_foreground=False,
+                                    vis_segmentation=False)[0]
+
+        if self.config['vis']['vis_detector_output']:
+            vis.figure()
+            vis.subplot(1, 2, 1)
+            vis.imshow(detection.color_thumbnail)
+            vis.subplot(1, 2, 2)
+            vis.imshow(detection.depth_thumbnail)
+            vis.show()
 
         boundingBox = BoundingBox()
         boundingBox.minY = detection.bounding_box.min_pt[0]
@@ -196,11 +207,38 @@ class PickAndDropProgram(object):
 
         try:
             start_time = time.time()
-            planned_grasp_data = self.plan_grasp_client(inpainted_color_image.rosmsg, inpainted_depth_image.rosmsg, camera_intrinsics.rosmsg, boundingBox)
+            planned_grasp_data = self.plan_grasp_client(inpainted_color_image.rosmsg,
+                                                        inpainted_depth_image.rosmsg,
+                                                        camera_intrinsics.rosmsg,
+                                                        boundingBox,
+                                                        None)
             grasp_plan_time = time.time() - start_time
             rospy.loginfo("Planning time: {}".format(grasp_plan_time))
-            rospy.loginfo("planned_grasp_data:\n{}".format(planned_grasp_data.grasp.pose))
-            return planned_grasp_data.grasp.pose
+            rospy.loginfo("Camera CS planned_grasp_data:\n{}".format(planned_grasp_data.grasp.pose))
+
+            grasp_camera_pose = planned_grasp_data.grasp
+            rospy.loginfo('Processing Grasp')
+
+            # create Stamped ROS Transform
+            camera_world_transform = TransformStamped()
+            camera_world_transform.header.stamp = rospy.Time.now()
+            camera_world_transform.header.frame_id = 'kinect2_camera_frame'
+            camera_world_transform.child_frame_id = 'world'
+
+            camera_world_transform.transform.translation.x = self.tf_camera_world.translation[0]
+            camera_world_transform.transform.translation.y = self.tf_camera_world.translation[1]
+            camera_world_transform.transform.translation.z = self.tf_camera_world.translation[2]
+
+            q = self.tf_camera_world.quaternion
+            camera_world_transform.transform.rotation.x = q[1]
+            camera_world_transform.transform.rotation.y = q[2]
+            camera_world_transform.transform.rotation.z = q[3]
+            camera_world_transform.transform.rotation.w = q[0]
+
+            grasp_world_pose = tf2_geometry_msgs.do_transform_pose(grasp_camera_pose, camera_world_transform)
+            rospy.loginfo("World CS planned_grasp_data:\n{}".format(grasp_world_pose))
+            return grasp_world_pose
+
         except rospy.ServiceException as e:
             rospy.logerr("Service call failed: \n %s" % e)
             return None
@@ -230,31 +268,31 @@ def main():
             else:
                 vision_fail_counter = 5
 
-            # print("============ Press `Enter` to go to near box pose ...")
-            # raw_input()
-            # program.go_to_pose(NEAR_BOX_POSE)
-            #
-            # print("============ Press `Enter` to turn on suction pad ...")
-            # raw_input()
-            # # turn on suction pad
-            # program.turn_on_suction_pad()
-            #
-            # print("============ Press `Enter` to go to pick object pose ...")
-            # raw_input()
-            # program.go_to_pose(object_pose)
-            #
-            # print("============ Press `Enter` to go to near box pose ...")
-            # raw_input()
-            # program.go_to_pose(NEAR_BOX_POSE)
-            #
-            # print("============ Press `Enter` to go to drop pose ...")
-            # raw_input()
-            # program.go_to_pose(DROP_POSE)
-            #
-            # print("============ Press `Enter` to turn off suction pad ...")
-            # raw_input()
-            # # turn off suction pad
-            # program.turn_off_suction_pad()
+            print("============ Press `Enter` to go to near box pose ...")
+            raw_input()
+            program.go_to_pose(NEAR_BOX_POSE)
+
+            print("============ Press `Enter` to turn on suction pad ...")
+            raw_input()
+            # turn on suction pad
+            program.turn_on_suction_pad()
+
+            print("============ Press `Enter` to go to pick object pose ...")
+            raw_input()
+            program.go_to_pose(object_pose)
+
+            print("============ Press `Enter` to go to near box pose ...")
+            raw_input()
+            program.go_to_pose(NEAR_BOX_POSE)
+
+            print("============ Press `Enter` to go to drop pose ...")
+            raw_input()
+            program.go_to_pose(DROP_POSE)
+
+            print("============ Press `Enter` to turn off suction pad ...")
+            raw_input()
+            # turn off suction pad
+            program.turn_off_suction_pad()
 
             print("============ Press `Enter` to continue or `q` to quit ...")
             c = raw_input()

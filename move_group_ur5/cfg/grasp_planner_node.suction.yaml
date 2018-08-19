@@ -8,9 +8,6 @@ policy:
   gmm_component_frac: 0.4
   gmm_reg_covar: 0.01
 
-  # gqcnn params
-  gqcnn_model: /home/user/Downloads/GQ-Suction
-
   # general params
   deterministic: 1
   max_approach_angle: 80
@@ -36,12 +33,10 @@ policy:
 
     num_grasp_samples: 500
 
-
   # metrics
   metric:
     type: gqcnn
-    gqcnn_model: /home/user/Downloads/GQ-Suction
-    
+    gqcnn_model: models/GQ-Suction
     crop_height: 96
     crop_width: 96
 
@@ -50,10 +45,10 @@ policy:
     grasp_sampling : 0
     tf_images: 0
     grasp_candidates: 0
-    elite_grasps: 0
+    elite_grasps: 1
     grasp_ranking: 0
-    grasp_plan: 0
-    final_grasp: 0
+    grasp_plan: 1
+    final_grasp: 1
 
     vmin: 0.6
     vmax: 0.9
