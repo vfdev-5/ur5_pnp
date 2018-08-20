@@ -9,7 +9,7 @@
 <xacro:property name="wz" value="1.06" />
 
 <material name="yellow">
-  <color rgba="1 1 0 0.5"/>
+  <color rgba="1 1 0 0.25"/>
 </material>
 
 

@@ -33,9 +33,12 @@ if __name__ == '__main__':
     # load RigidTransform
     rospy.loginfo('Loading T_camera_world')
     T_camera_world = RigidTransform.load(rospy.get_param('~world_camera_tf'))
+    T_camera_world = T_camera_world.inverse()
 
-    print("T_camera_world:", T_camera_world)
-    print("T_camera_world.R:", T_camera_world.rotation)
+    print("T_camera_world: {}".format(T_camera_world))
+    print("T_camera_world.from_frame: {}".format(T_camera_world.from_frame))
+    print("T_camera_world.to_frame: {}".format(T_camera_world.to_frame))
+    print("T_camera_world.R: {}".format(T_camera_world.rotation))
 
     # create broadcaster
     transform_broadcaster = tf2_ros.TransformBroadcaster()
@@ -46,8 +49,8 @@ if __name__ == '__main__':
         # create Stamped ROS Transform
         camera_world_transform = TransformStamped()
         camera_world_transform.header.stamp = rospy.Time.now()
-        camera_world_transform.header.frame_id = T_camera_world.from_frame
-        camera_world_transform.child_frame_id = T_camera_world.to_frame
+        camera_world_transform.header.frame_id = T_camera_world.to_frame
+        camera_world_transform.child_frame_id = T_camera_world.from_frame
 
         camera_world_transform.transform.translation.x = T_camera_world.translation[0]
         camera_world_transform.transform.translation.y = T_camera_world.translation[1]

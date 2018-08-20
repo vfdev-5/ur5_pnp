@@ -12,23 +12,23 @@ from moveit_commander.conversions import pose_to_list
 # Poses to boxes + Up state pose
 UP_POSE = geometry_msgs.msg.Pose(
     position=Point(-0.449776958114, 0.146191358556, 1.02599018264),
-    orientation=Quaternion(0.0225368166985, -0.808053659539, -0.588442707886, 0.0166299348762))
+    orientation=Quaternion(-0.0225368166985, 0.975621319646, -0.217918914924, 0.00573890080621))
 
 NEAR_BOX_POSE = geometry_msgs.msg.Pose(
     position=Point(-0.690099627989, 0.81849128041, 0.358930709262),
-    orientation=Quaternion(-0.0262376625131, 0.752089932142, 0.0988363827275, 0.651032927931))
+    orientation=Quaternion(0.493303531759, 0.542261814246, -0.514968722431, 0.44430953769))
 
 NEAR_DROP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-1.07128657834, 0.320749025386, 0.20939021189),
-    orientation=Quaternion(-0.322710358702, 0.646787770911, 0.332593909725, 0.60572674945))
+    position=Point(-1.04289410735, 0.322157005282, 0.220911818489),
+    orientation=Quaternion(0.22781686266, 0.689438716887, -0.313478313812, 0.611968201392))
 
 DROP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-1.10543750452, 0.329165925663, 0.111933751523),
-    orientation=Quaternion(-0.297015016999, 0.670153720059, 0.359937433728, 0.577166453434))
+    position=Point(-1.06653140818, 0.305945123927, 0.123294518075),
+    orientation=Quaternion(0.21940752316, 0.685697802181, -0.305246393463, 0.62330049105))
 
 PICK_OBJ_POSE = geometry_msgs.msg.Pose(
-    position=Point(-0.681712055451, 0.857038535714, 0.171914642793),
-    orientation=Quaternion(-0.0783699121759, 0.709078929531, 0.0407076152722, 0.69957709984))
+    position=Point(-0.632689452737, 0.872960752869, 0.140723604517),
+    orientation=Quaternion(0.491085000724, 0.502232066142, -0.526102378448, 0.479389988625))
 
 
 def all_close(goal, actual, tolerance):
@@ -200,11 +200,19 @@ def main():
             # turn off suction pad
             program.turn_off_suction_pad()
 
+            print("============ Press `Enter` to go to near drop pose ...")
+            c = raw_input()
+            if c == 'q':
+                break
+            if not program.go_to_pose(NEAR_DROP_POSE):
+                break
+
             print("============ Press `Enter` to continue or `q` to quit ...")
             c = raw_input()
             if c == 'q':
                 break
 
+        program.turn_off_suction_pad()
         program.go_to_pose(UP_POSE)
         print("============ Program complete!")
 

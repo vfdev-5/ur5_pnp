@@ -80,7 +80,7 @@
   <joint name="world_box_3_joint" type="fixed">
     <parent link="world"/>
     <child link="box_3_base"/>
-    <origin xyz="-${src_box_w * 0.5 + src_box_h * 2.0} ${ws_ysize - src_box_w * 0.5} 0.0" rpy="0 0 ${half_pi}"/>
+    <origin xyz="-${src_box_w * 0.5 + src_box_h * 2.25} ${ws_ysize - src_box_w * 0.5} 0.0" rpy="0 0 ${half_pi}"/>
   </joint>
 
   <joint name="world_box_4_joint" type="fixed">

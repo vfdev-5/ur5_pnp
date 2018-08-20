@@ -2,7 +2,7 @@
 
 import sys
 import time
-import numpy as np
+import tf2_ros
 import rospy
 import moveit_commander
 import geometry_msgs.msg
@@ -23,19 +23,19 @@ from autolab_core import RigidTransform
 # Poses to boxes + Up state pose
 UP_POSE = geometry_msgs.msg.Pose(
     position=Point(-0.449776958114, 0.146191358556, 1.02599018264),
-    orientation=Quaternion(0.0225368166985, -0.808053659539, -0.588442707886, 0.0166299348762))
+    orientation=Quaternion(-0.0225368166985, 0.975621319646, -0.217918914924, 0.00573890080621))
 
 NEAR_BOX_POSE = geometry_msgs.msg.Pose(
     position=Point(-0.690099627989, 0.81849128041, 0.358930709262),
-    orientation=Quaternion(-0.0262376625131, 0.752089932142, 0.0988363827275, 0.651032927931))
+    orientation=Quaternion(0.493303531759, 0.542261814246, -0.514968722431, 0.44430953769))
 
 NEAR_DROP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-1.07128657834, 0.320749025386, 0.20939021189),
-    orientation=Quaternion(-0.322710358702, 0.646787770911, 0.332593909725, 0.60572674945))
+    position=Point(-1.04289410735, 0.322157005282, 0.220911818489),
+    orientation=Quaternion(0.22781686266, 0.689438716887, -0.313478313812, 0.611968201392))
 
 DROP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-1.10543750452, 0.329165925663, 0.111933751523),
-    orientation=Quaternion(-0.297015016999, 0.670153720059, 0.359937433728, 0.577166453434))
+    position=Point(-1.06653140818, 0.305945123927, 0.123294518075),
+    orientation=Quaternion(0.21940752316, 0.685697802181, -0.305246393463, 0.62330049105))
 
 
 def all_close(goal, actual, tolerance):
@@ -134,6 +134,8 @@ class PickAndDropProgram(object):
         rospy.wait_for_service('grasping_policy')
         self.plan_grasp_client = rospy.ServiceProxy('grasping_policy', GQCNNGraspPlanner)
 
+        self.transform_broadcaster = tf2_ros.TransformBroadcaster()
+
         # Misc variables
         self.robot = robot
         self.scene = scene
@@ -154,6 +156,31 @@ class PickAndDropProgram(object):
         # Now, we call the planner to compute the plan and execute it.
         plan = group.go(wait=True)
         # Calling `stop()` ensures that there is no residual movement
+        group.stop()
+        # It is always good to clear your targets after planning with poses.
+        # Note: there is no equivalent function for clear_joint_value_targets()
+        group.clear_pose_targets()
+
+        # For testing:
+        # Note that since this section of code will not be included in the tutorials
+        # we use the class variable rather than the copied state variable
+        current_pose = self.group.get_current_pose().pose
+        return all_close(pose_goal, current_pose, 0.01)
+
+    def plan_to_pose(self, pose_goal):
+        group = self.group
+        group.allow_replanning(True)
+        group.set_planning_time(10)
+        plan = group.plan(pose_goal)
+        group.allow_replanning(False)
+        group.set_planning_time(5)
+        return plan
+
+    def execute_plan(self, plan_msg, pose_goal):
+        group = self.group
+        if not group.execute(plan_msg, wait=True):
+            return False
+
         group.stop()
         # It is always good to clear your targets after planning with poses.
         # Note: there is no equivalent function for clear_joint_value_targets()
@@ -216,8 +243,13 @@ class PickAndDropProgram(object):
             rospy.loginfo("Planning time: {}".format(grasp_plan_time))
             rospy.loginfo("Camera CS planned_grasp_data:\n{}".format(planned_grasp_data.grasp.pose))
 
+            if planned_grasp_data.grasp.q_value < 0.20:
+                rospy.loginfo("Q value is too small : {}".format(planned_grasp_data.grasp.q_value))
+                return None
+
             grasp_camera_pose = planned_grasp_data.grasp
             rospy.loginfo('Processing Grasp')
+            self.broadcast_pose_as_transform(self.tf_camera_world.from_frame, "object_link", grasp_camera_pose.pose)
 
             # create Stamped ROS Transform
             camera_world_transform = TransformStamped()
@@ -243,6 +275,24 @@ class PickAndDropProgram(object):
             rospy.logerr("Service call failed: \n %s" % e)
             return None
 
+    def broadcast_pose_as_transform(self, frame_id, child_frame_id, pose):
+
+        tf = TransformStamped()
+        tf.header.stamp = rospy.Time.now()
+        tf.header.frame_id = frame_id
+        tf.child_frame_id = child_frame_id
+
+        tf.transform.translation.x = pose.position.x
+        tf.transform.translation.y = pose.position.y
+        tf.transform.translation.z = pose.position.z
+
+        tf.transform.rotation.x = pose.orientation.x
+        tf.transform.rotation.y = pose.orientation.y
+        tf.transform.rotation.z = pose.orientation.z
+        tf.transform.rotation.w = pose.orientation.w
+
+        self.transform_broadcaster.sendTransform(tf)
+
 
 def main():
 
@@ -250,14 +300,18 @@ def main():
         program = PickAndDropProgram()
 
         print("============ Press `Enter` to initialize pose")
-        raw_input()
+        c = raw_input()
+        if c == 'q':
+            return
         program.go_to_pose(UP_POSE)
 
         vision_fail_counter = 5
         while True:
 
             print("============ Press `Enter` to get object pose ...")
-            raw_input()
+            c = raw_input()
+            if c == 'q':
+                break
             object_pose = program.compute_object_pose()
             if object_pose is None:
                 vision_fail_counter -= 1
@@ -281,11 +335,23 @@ def main():
             # turn on suction pad
             program.turn_on_suction_pad()
 
-            print("============ Press `Enter` to go to pick object pose ...")
+            print("============ Press `Enter` to plan to pick object pose ...")
             c = raw_input()
             if c == 'q':
                 break
-            if not program.go_to_pose(object_pose):
+
+            # if not program.go_to_pose(object_pose):
+            #     break
+            plan_msg = program.plan_to_pose(object_pose)
+            print("Plan nb of points", len(plan_msg.joint_trajectory.points))
+            if len(plan_msg.joint_trajectory.points) == 0:
+                break
+
+            print("============ Press `Enter` to execute to pick object pose ...")
+            c = raw_input()
+            if c == 'q':
+                break
+            if not program.execute_plan(plan_msg, object_pose):
                 break
 
             print("============ Press `Enter` to go to near box pose ...")
