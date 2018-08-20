@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<robot name="wall" xmlns:xacro="http://ros.org/wiki/xacro">
+
+
+<!-- Definition of table dimensions  -->
+<xacro:property name="wx" value="1.18" />
+<xacro:property name="wy" value="1.08" />
+<xacro:property name="wdepth" value="0.02" />
+<xacro:property name="wz" value="1.06" />
+
+<material name="yellow">
+  <color rgba="1 1 0 0.5"/>
+</material>
+
+
+
+<xacro:macro name="generic_wall" params="prefix x y z">
+
+<link name="${prefix}_wall">
+  <visual>
+    <origin xyz="-${x / 2} -${y / 2} ${z / 2}" rpy="0 0 0"/>
+    <geometry>
+      <box size="${x} ${y} ${z}"/>
+    </geometry>
+    <material name="yellow" />
+  </visual>
+  <collision>
+    <origin xyz="-${x / 2} -${y / 2} ${z / 2}" rpy="0 0 0"/>
+    <geometry>
+      <box size="${x} ${y} ${z}"/>
+    </geometry>
+  </collision>
+</link>
+</xacro:macro>
+
+</robot>
