@@ -20,12 +20,12 @@
   <xacro:generic_wall prefix="right" x="${wdepth}" y="${wy}" z="${wz}"/>
   <xacro:table name="table"/>
   <xacro:box_source name="box_1"/>
-  <xacro:box_source name="box_2"/>
-  <xacro:box_source name="box_3"/>
-  <xacro:box_source name="box_4"/>
-  <xacro:box_source name="box_5"/>
-  <xacro:box_source name="box_6"/>
-  <xacro:box_source name="box_7"/>
+  <!--<xacro:box_source name="box_2"/>-->
+  <!--<xacro:box_source name="box_3"/>-->
+  <!--<xacro:box_source name="box_4"/>-->
+  <!--<xacro:box_source name="box_5"/>-->
+  <!--<xacro:box_source name="box_6"/>-->
+  <!--<xacro:box_source name="box_7"/>-->
   <xacro:box_destination name="box_dst"/>
 
 
@@ -44,7 +44,7 @@
   <joint name="world_bottom_wall_joint" type="fixed">
     <parent link="world"/>
     <child link="bottom_wall"/>
-    <origin xyz="0 -${wdepth + 0.05} 0" rpy="0 0 0"/>
+    <origin xyz="0 -${wdepth + 0.30} 0" rpy="0 0 0"/>
   </joint>
 
   <joint name="world_right_wall_joint" type="fixed">
@@ -56,7 +56,7 @@
   <joint name="world_camera_obstacle_joint" type="fixed">
     <parent link="world"/>
     <child link="camera_obstacle_link"/>
-    <origin xyz="-0.53 0.85 0.710" rpy="0 0 0"/>
+    <origin xyz="-0.234 0.555 0.90" rpy="0 0 0"/>
   </joint>
 
   <joint name="world_table_link_joint" type="fixed">
@@ -68,44 +68,50 @@
   <joint name="world_box_1_joint" type="fixed">
     <parent link="world"/>
     <child link="box_1_base"/>
-    <origin xyz="-${src_box_w * 0.5} ${ws_ysize - src_box_w * 0.5} 0.0" rpy="0 0 ${half_pi}"/>
+    <origin xyz="-${src_box_w * 0.5 + 0.2253} ${ws_ysize - src_box_h * 0.25 - 0.375} ${tz}" rpy="0 0 0"/>
   </joint>
 
-  <joint name="world_box_2_joint" type="fixed">
-    <parent link="world"/>
-    <child link="box_2_base"/>
-    <origin xyz="-${src_box_w * 0.5 + src_box_h * 1.0} ${ws_ysize - src_box_w * 0.5} 0.0" rpy="0 0 ${half_pi}"/>
-  </joint>
+  <!--<joint name="world_box_1_joint" type="fixed">-->
+    <!--<parent link="world"/>-->
+    <!--<child link="box_1_base"/>-->
+    <!--<origin xyz="-${src_box_w * 0.5} ${ws_ysize - src_box_w * 0.5} 0.0" rpy="0 0 ${half_pi}"/>-->
+  <!--</joint>-->
 
-  <joint name="world_box_3_joint" type="fixed">
-    <parent link="world"/>
-    <child link="box_3_base"/>
-    <origin xyz="-${src_box_w * 0.5 + src_box_h * 2.25} ${ws_ysize - src_box_w * 0.5} 0.0" rpy="0 0 ${half_pi}"/>
-  </joint>
+  <!--<joint name="world_box_2_joint" type="fixed">-->
+    <!--<parent link="world"/>-->
+    <!--<child link="box_2_base"/>-->
+    <!--<origin xyz="-${src_box_w * 0.5 + src_box_h * 1.0} ${ws_ysize - src_box_w * 0.5} 0.0" rpy="0 0 ${half_pi}"/>-->
+  <!--</joint>-->
 
-  <joint name="world_box_4_joint" type="fixed">
-    <parent link="world"/>
-    <child link="box_4_base"/>
-    <origin xyz="-${src_box_w * 0.5 + src_box_h * 2.5} ${ws_ysize - src_box_w - src_box_h * 0.5} 0.0" rpy="0 0 0"/>
-  </joint>
+  <!--<joint name="world_box_3_joint" type="fixed">-->
+    <!--<parent link="world"/>-->
+    <!--<child link="box_3_base"/>-->
+    <!--<origin xyz="-${src_box_w * 0.5 + src_box_h * 2.25} ${ws_ysize - src_box_w * 0.5} 0.0" rpy="0 0 ${half_pi}"/>-->
+  <!--</joint>-->
 
-  <joint name="world_box_5_joint" type="fixed">
-    <parent link="world"/>
-    <child link="box_5_base"/>
-    <origin xyz="-${src_box_w * 0.5 + src_box_h * 2.5} ${ws_ysize - src_box_w - src_box_h * 1.5} 0.0" rpy="0 0 0"/>
-  </joint>
+  <!--<joint name="world_box_4_joint" type="fixed">-->
+    <!--<parent link="world"/>-->
+    <!--<child link="box_4_base"/>-->
+    <!--<origin xyz="-${src_box_w * 0.5 + src_box_h * 2.5} ${ws_ysize - src_box_w - src_box_h * 0.5} 0.0" rpy="0 0 0"/>-->
+  <!--</joint>-->
 
-  <joint name="world_box_6_joint" type="fixed">
-    <parent link="world"/>
-    <child link="box_6_base"/>
-    <origin xyz="-${src_box_w * 0.5 + src_box_h * 2.5} ${ws_ysize - src_box_w - src_box_h * 2.5} 0.0" rpy="0 0 0"/>
-  </joint>
+  <!--<joint name="world_box_5_joint" type="fixed">-->
+    <!--<parent link="world"/>-->
+    <!--<child link="box_5_base"/>-->
+    <!--<origin xyz="-${src_box_w * 0.5 + src_box_h * 2.5} ${ws_ysize - src_box_w - src_box_h * 1.5} 0.0" rpy="0 0 0"/>-->
+  <!--</joint>-->
 
-  <joint name="world_box_7_joint" type="fixed">
-    <parent link="world"/>
-    <child link="box_7_base"/>
-    <origin xyz="${src_box_w * 0.5 - src_box_h * 2.5} ${ws_ysize - src_box_w - src_box_h * 0.5} ${tz}" rpy="0 0 0"/>
-  </joint>
+  <!--<joint name="world_box_6_joint" type="fixed">-->
+    <!--<parent link="world"/>-->
+    <!--<child link="box_6_base"/>-->
+    <!--<origin xyz="-${src_box_w * 0.5 + src_box_h * 2.5} ${ws_ysize - src_box_w - src_box_h * 2.5} 0.0" rpy="0 0 0"/>-->
+  <!--</joint>-->
+
+  <!--<joint name="world_box_7_joint" type="fixed">-->
+    <!--<parent link="world"/>-->
+    <!--<child link="box_7_base"/>-->
+    <!--<origin xyz="${src_box_w * 0.5 - src_box_h * 2.5} ${ws_ysize - src_box_w - src_box_h * 0.5} ${tz}" rpy="0 0 0"/>-->
+  <!--</joint>-->
 
   <joint name="world_box_dst_joint" type="fixed">
     <parent link="world"/>

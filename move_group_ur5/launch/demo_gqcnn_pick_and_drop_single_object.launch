@@ -8,12 +8,12 @@
   <arg name="service_config" default="$(find move_group_ur5)/cfg/grasp_planner_node.suction.yaml" />
   <arg name="model_dir" default="$(find gqcnn)/models/GQ-Suction" />
 
-  <!--<node name="suction_pad_comm"-->
-    <!--pkg="rosserial_python"-->
-    <!--type="serial_node.py"-->
-    <!--output="screen" >-->
-    	<!--<param name="port" value="/dev/ttyUSB0" />-->
-  <!--</node>-->
+  <node name="suction_pad_comm"
+    pkg="rosserial_python"
+    type="serial_node.py"
+    output="screen" >
+    	<param name="port" value="/dev/ttyUSB0" />
+  </node>
 
   <node name="GQCNN_grasp_planner"  pkg="gqcnn" type="grasp_planner_node.py" output="screen" >
     	<param name="config"           value="$(arg service_config)" />

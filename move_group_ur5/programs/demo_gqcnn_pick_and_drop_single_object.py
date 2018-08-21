@@ -21,12 +21,17 @@ from autolab_core import RigidTransform
 
 
 # Poses to boxes + Up state pose
+# UP_POSE = geometry_msgs.msg.Pose(
+#     position=Point(-0.449776958114, 0.146191358556, 1.02599018264),
+#     orientation=Quaternion(-0.0225368166985, 0.975621319646, -0.217918914924, 0.00573890080621))
+
 UP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-0.449776958114, 0.146191358556, 1.02599018264),
-    orientation=Quaternion(-0.0225368166985, 0.975621319646, -0.217918914924, 0.00573890080621))
+    position=Point(-0.355011377996, 0.302698289576, 0.355856198301),
+    orientation=Quaternion(-0.628876449134, 0.318947102362, 0.638921332961, 0.307516971736))
 
 NEAR_BOX_POSE = geometry_msgs.msg.Pose(
-    position=Point(-0.690099627989, 0.81849128041, 0.358930709262),
+    # position=Point(-0.690099627989, 0.81849128041, 0.358930709262),
+    position=Point(-0.45, 0.60, 0.36),
     orientation=Quaternion(0.493303531759, 0.542261814246, -0.514968722431, 0.44430953769))
 
 NEAR_DROP_POSE = geometry_msgs.msg.Pose(
@@ -208,8 +213,8 @@ class PickAndDropProgram(object):
         inpainted_depth_image = depth_image.inpaint(rescale_factor=self.config['inpaint_rescale_factor'])
 
         detector_cfg = self.config['detector']
-        detector_cfg['image_width'] = inpainted_depth_image.width // 10
-        detector_cfg['image_height'] = inpainted_depth_image.height // 10
+        detector_cfg['image_width'] = inpainted_depth_image.width // 6
+        detector_cfg['image_height'] = inpainted_depth_image.height // 6
         detector = RgbdDetectorFactory.detector('point_cloud_box')
         detection = detector.detect(inpainted_color_image, inpainted_depth_image,
                                     detector_cfg,

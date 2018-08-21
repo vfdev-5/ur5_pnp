@@ -3,11 +3,17 @@
   <arg name="ns"  default="gqcnn" />
   
   <!-- Configuration file for Grasp Planner Node -->
-  <arg name="config"           default="$(find gqcnn)/cfg/ros_nodes/kinect2_client_node.yaml" />
-  <arg name="world_camera_tf"           default="$(find gqcnn)/data/calib/kincet2_world_identity.tf" />
+  <arg name="config"           default="$(find move_group_ur5)/cfg/kinect2_client_node.yaml" />
+  <arg name="world_camera_tf" default="$(find move_group_ur5)/cfg/sensor_to_world.tf" />
   <arg name="model_dir"        default="$(find gqcnn)/models/GQ-Suction" />
-  
-  <node name="kinect2_client"  pkg="gqcnn" type="kinect2_client_node.py" output="screen" >
+  <arg name="service_config" default="$(find move_group_ur5)/cfg/grasp_planner_node.suction.yaml" />
+
+  <node name="GQCNN_grasp_planner"  pkg="gqcnn" type="grasp_planner_node.py" output="screen" >
+    	<param name="config"           value="$(arg service_config)" />
+    	<param name="model_dir"           value="$(arg model_dir)" />
+  </node>
+
+  <node name="kinect2_client"  pkg="move_group_ur5" type="kinect2_client_node.py" output="screen" >
     <param name="config"           value="$(arg config)" />
     <param name="world_camera_tf"  value="$(arg world_camera_tf)" />
     <param name="model_dir"        value="$(arg model_dir)" />

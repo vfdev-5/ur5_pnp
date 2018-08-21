@@ -58,8 +58,8 @@ policy:
 # visualization
 vis:
   cropped_rgbd_image: 0
-  color_image: 0
-  depth_image: 0
+  color_image: 1
+  depth_image: 1
   segmask: 0
 
 # inpaint

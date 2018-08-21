@@ -46,14 +46,14 @@ def run_experiment():
 
     print("inpainted_color_image: shape", inpainted_depth_image.shape)
 
-    detector_cfg['image_width'] = inpainted_depth_image.width // 10
-    detector_cfg['image_height'] = inpainted_depth_image.height // 10
+    detector_cfg['image_width'] = inpainted_depth_image.width // 5
+    detector_cfg['image_height'] = inpainted_depth_image.height // 5
     detector = RgbdDetectorFactory.detector('point_cloud_box')
     rospy.loginfo("Detect bbox")
     detection = detector.detect(
         inpainted_color_image, inpainted_depth_image,
         detector_cfg, camera_intrinsics,
-        T_camera_world, vis_foreground=True, vis_segmentation=True)[0]
+        T_camera_world, vis_foreground=False, vis_segmentation=False)[0]
 
     if config['vis']['vis_detector_output']:
         vis.figure()
@@ -124,8 +124,5 @@ if __name__ == '__main__':
             sensor.stop()
         exit(0)
     signal.signal(signal.SIGINT, handler)
-    
-    # run experiment
-    run_experiment()
 
-    rospy.spin()
+    run_experiment()
