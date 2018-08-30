@@ -2,30 +2,92 @@
 <robot name="wall" xmlns:xacro="http://ros.org/wiki/xacro">
 
 
-<!-- Definition of table dimensions  -->
+<!-- Definition of camera dimensions  -->
 <xacro:property name="cam_x" value="0.30" />
 <xacro:property name="cam_y" value="0.07" />
 <xacro:property name="cam_z" value="0.10" />
+
+<!-- Definition of camera dimensions  -->
+<xacro:property name="hor_bulk_x" value="0.09" />
+<xacro:property name="hor_bulk_y" value="0.563" />
+<xacro:property name="hor_bulk_z" value="0.045" />
+
+<xacro:property name="vert_bulk_x" value="0.09" />
+<xacro:property name="vert_bulk_y" value="0.045" />
+<xacro:property name="vert_bulk_z" value="0.965" />
+
 
 <material name="black">
   <color rgba="0 0 0 0.8"/>
 </material>
 
+<material name="gray">
+  <color rgba="0.4 0.4 0.4 0.8"/>
+</material>
+
 
 <link name="camera_obstacle_link">
   <visual>
-    <origin xyz="-${cam_x / 2} ${cam_y / 2} ${cam_z / 2}" rpy="0 0 0"/>
     <geometry>
       <box size="${cam_x} ${cam_y} ${cam_z}"/>
     </geometry>
     <material name="black" />
   </visual>
   <collision>
-    <origin xyz="-${cam_x / 2} ${cam_y / 2} ${cam_z / 2}" rpy="0 0 0"/>
     <geometry>
       <box size="${cam_x} ${cam_y} ${cam_z}"/>
     </geometry>
   </collision>
 </link>
+
+
+<link name="camera_hor_fixation_obstacle_link">
+  <visual>
+    <origin xyz="-${hor_bulk_x / 2} ${hor_bulk_y / 2} ${hor_bulk_z / 2}" rpy="0 0 0"/>
+    <geometry>
+      <box size="${hor_bulk_x} ${hor_bulk_y} ${hor_bulk_z}"/>
+    </geometry>
+    <material name="gray" />
+  </visual>
+  <collision>
+    <origin xyz="-${hor_bulk_x / 2} ${hor_bulk_y / 2} ${hor_bulk_z / 2}" rpy="0 0 0"/>
+    <geometry>
+      <box size="${hor_bulk_x} ${hor_bulk_y} ${hor_bulk_z}"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="camera_vert_fixation_obstacle_link">
+  <visual>
+    <origin xyz="-${vert_bulk_x / 2} ${vert_bulk_y / 2} ${vert_bulk_z / 2}" rpy="0 0 0"/>
+    <geometry>
+      <box size="${vert_bulk_x} ${vert_bulk_y} ${vert_bulk_z}"/>
+    </geometry>
+    <material name="gray" />
+  </visual>
+  <collision>
+    <origin xyz="-${vert_bulk_x / 2} ${vert_bulk_y / 2} ${vert_bulk_z / 2}" rpy="0 0 0"/>
+    <geometry>
+      <box size="${vert_bulk_x} ${vert_bulk_y} ${vert_bulk_z}"/>
+    </geometry>
+  </collision>
+</link>
+
+
+<joint name="camera_vert_hor_joint" type="fixed">
+  <parent link="camera_vert_fixation_obstacle_link"/>
+  <child link="camera_hor_fixation_obstacle_link"/>
+  <origin xyz="0.0 -${hor_bulk_y} ${vert_bulk_z - hor_bulk_z}" rpy="0 0 0"/>
+</joint>
+
+<joint name="camera_hor_joint" type="fixed">
+  <parent link="camera_hor_fixation_obstacle_link"/>
+  <child link="camera_obstacle_link"/>
+  <origin xyz="-${hor_bulk_x / 2} 0.16 -0.044" rpy="0 0 0"/>
+</joint>
+
+
+
+
 
 </robot>

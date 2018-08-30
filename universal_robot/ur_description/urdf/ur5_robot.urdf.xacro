@@ -20,7 +20,7 @@ cd
   <joint name="table_base_link_joint" type="fixed">
     <parent link="table" />
     <child link = "base_link" />
-    <origin xyz="-0.105 0.09 0.0" rpy="0.0 0.0 1.57079632679" />
+    <origin xyz="-0.125 0.125 0.0" rpy="0.0 0.0 0.7853981633974483" />
   </joint>
 
   <joint name="ee_joint" type="fixed">
