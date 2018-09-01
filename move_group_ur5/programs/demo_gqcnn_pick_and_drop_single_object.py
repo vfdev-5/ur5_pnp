@@ -18,6 +18,7 @@ from gqcnn.msg import GQCNNGrasp, BoundingBox
 from gqcnn.srv import GQCNNGraspPlanner
 from perception import RgbdDetectorFactory, RgbdSensorFactory
 from autolab_core import RigidTransform
+import joint_state_filereader
 
 
 # Poses to boxes + Up state pose
@@ -25,22 +26,22 @@ from autolab_core import RigidTransform
 #     position=Point(-0.449776958114, 0.146191358556, 1.02599018264),
 #     orientation=Quaternion(-0.0225368166985, 0.975621319646, -0.217918914924, 0.00573890080621))
 
-UP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-0.355011377996, 0.302698289576, 0.355856198301),
-    orientation=Quaternion(-0.628876449134, 0.318947102362, 0.638921332961, 0.307516971736))
+# UP_POSE = geometry_msgs.msg.Pose(
+#     position=Point(-0.355011377996, 0.302698289576, 0.355856198301),
+#     orientation=Quaternion(-0.628876449134, 0.318947102362, 0.638921332961, 0.307516971736))
 
-NEAR_BOX_POSE = geometry_msgs.msg.Pose(
-    # position=Point(-0.690099627989, 0.81849128041, 0.358930709262),
-    position=Point(-0.45, 0.60, 0.36),
-    orientation=Quaternion(0.493303531759, 0.542261814246, -0.514968722431, 0.44430953769))
+# NEAR_BOX_POSE = geometry_msgs.msg.Pose(
+#     # position=Point(-0.690099627989, 0.81849128041, 0.358930709262),
+#     position=Point(-0.45, 0.60, 0.36),
+#     orientation=Quaternion(0.493303531759, 0.542261814246, -0.514968722431, 0.44430953769))
 
-NEAR_DROP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-1.04289410735, 0.322157005282, 0.220911818489),
-    orientation=Quaternion(0.22781686266, 0.689438716887, -0.313478313812, 0.611968201392))
+# NEAR_DROP_POSE = geometry_msgs.msg.Pose(
+#     position=Point(-1.04289410735, 0.322157005282, 0.220911818489),
+#     orientation=Quaternion(0.22781686266, 0.689438716887, -0.313478313812, 0.611968201392))
 
-DROP_POSE = geometry_msgs.msg.Pose(
-    position=Point(-1.06653140818, 0.305945123927, 0.123294518075),
-    orientation=Quaternion(0.21940752316, 0.685697802181, -0.305246393463, 0.62330049105))
+# DROP_POSE = geometry_msgs.msg.Pose(
+#     position=Point(-1.06653140818, 0.305945123927, 0.123294518075),
+#     orientation=Quaternion(0.21940752316, 0.685697802181, -0.305246393463, 0.62330049105))
 
 
 def all_close(goal, actual, tolerance):
@@ -73,6 +74,15 @@ class PickAndDropProgram(object):
         # First initialize `moveit_commander`_ and a `rospy`_ node:
         moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node('pick_and_drop_program', anonymous=True)
+
+        filepath = rospy.get_param('~goal_joint_states')
+        goal_joint_states = joint_state_filereader.read(filepath)
+        self.goal_names = [
+            "home", "near_box", "near_drop", "drop" 
+        ]
+        for name in self.goal_names:
+            assert name in goal_joint_states, \
+                "Joint state name '{}' is not found".format(name)
 
         # Declare suctionpad topics
         self.pub_to = rospy.Publisher('toArduino', String, queue_size=100)
@@ -148,6 +158,7 @@ class PickAndDropProgram(object):
         self.group_names = group_names
         self.config = config
         self.tf_camera_world = tf_camera_world
+        self.goal_joint_states = goal_joint_states
 
     def go_to_pose(self, pose_goal):
         # Copy class variables to local variables to make the web tutorials more clear.
@@ -171,6 +182,26 @@ class PickAndDropProgram(object):
         # we use the class variable rather than the copied state variable
         current_pose = self.group.get_current_pose().pose
         return all_close(pose_goal, current_pose, 0.01)
+
+    def go_to_state(self, joint_goal):
+        # Copy class variables to local variables to make the web tutorials more clear.
+        # In practice, you should use the class variables directly unless you have a good
+        # reason not to.
+        group = self.group
+        assert joint_goal is not None and len(joint_goal) == 6, \
+            "Problem with goal joint state {}".format(joint_goal)
+        # The go command can be called with joint values, poses, or without any
+        # parameters if you have already set the pose or joint target for the group
+        group.go(joint_goal, wait=True)
+
+        # Calling ``stop()`` ensures that there is no residual movement
+        group.stop()
+
+        # For testing:
+        # Note that since this section of code will not be included in the tutorials
+        # we use the class variable rather than the copied state variable
+        current_joints = self.group.get_current_joint_values()
+        return all_close(joint_goal, current_joints, 0.01)
 
     def plan_to_pose(self, pose_goal):
         group = self.group
@@ -202,6 +233,9 @@ class PickAndDropProgram(object):
 
     def turn_off_suction_pad(self):
         self.pub_to.publish("SUCKER:OFF")
+
+    def get_state(self, name):
+        return self.goal_joint_states[name]
 
     def compute_object_pose(self):
 
@@ -308,7 +342,7 @@ def main():
         c = raw_input()
         if c == 'q':
             return
-        program.go_to_pose(UP_POSE)
+        program.go_to_state(program.get_state('home'))
 
         vision_fail_counter = 5
         while True:
@@ -330,7 +364,7 @@ def main():
             c = raw_input()
             if c == 'q':
                 break
-            if not program.go_to_pose(NEAR_BOX_POSE):
+            if not program.go_to_state(program.get_state('near_box')):
                 break
 
             print("============ Press `Enter` to turn on suction pad ...")
@@ -363,21 +397,21 @@ def main():
             c = raw_input()
             if c == 'q':
                 break
-            if not program.go_to_pose(NEAR_BOX_POSE):
+            if not program.go_to_state(program.get_state('near_box')):
                 break
 
             print("============ Press `Enter` to go to near drop pose ...")
             c = raw_input()
             if c == 'q':
                 break
-            if not program.go_to_pose(NEAR_DROP_POSE):
+            if not program.go_to_state(program.get_state('near_drop')):
                 break
 
             print("============ Press `Enter` to go to drop pose ...")
             c = raw_input()
             if c == 'q':
                 break
-            if not program.go_to_pose(DROP_POSE):
+            if not program.go_to_state(program.get_state('near_drop')):
                 break
 
             print("============ Press `Enter` to turn off suction pad ...")
@@ -391,7 +425,7 @@ def main():
             c = raw_input()
             if c == 'q':
                 break
-            if not program.go_to_pose(NEAR_DROP_POSE):
+            if not program.go_to_state(program.get_state('near_drop')):
                 break
 
             print("============ Press `Enter` to continue or `q` to quit ...")
@@ -400,7 +434,7 @@ def main():
                 break
 
         program.turn_off_suction_pad()
-        program.go_to_pose(UP_POSE)
+        program.go_to_state(program.get_state('home'))
         print("============ Program complete!")
 
     except rospy.ROSInterruptException:
