@@ -1,6 +1,7 @@
 <launch>
   <!-- Namespace for the node and services -->
   <arg name="ns"  default="ur5_pnp_demo" />
+  <arg name="goal_joint_states" default="$(find move_group_ur5)/cfg/pick_and_drop.cmds" />
 
   <node name="suction_pad_comm"
     pkg="rosserial_python"
@@ -13,6 +14,7 @@
     pkg="move_group_ur5" 
     type="automate_pick_and_drop_single_object.py"
     output="screen" >
+    <param name="goal_joint_states"           value="$(arg goal_joint_states)" />
   </node>
 
 </launch>

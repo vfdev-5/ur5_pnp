@@ -7,7 +7,7 @@
 <xacro:property name="wz" value="1.1" />
 
 <material name="yellow">
-  <color rgba="1 1 0 0.25"/>
+  <color rgba="1 1 0 0.15"/>
 </material>
 
 
@@ -23,7 +23,7 @@
     <material name="yellow" />
   </visual>
   <collision>
-    <!--<origin xyz="-${x / 2} -${y / 2} ${z / 2}" rpy="0 0 0"/>-->
+    <origin xyz="-${x / 2} -${y / 2} ${z / 2}" rpy="0 0 0"/>
     <geometry>
       <box size="${x} ${y} ${z}"/>
     </geometry>
