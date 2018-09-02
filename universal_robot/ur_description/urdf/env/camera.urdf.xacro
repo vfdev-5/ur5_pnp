@@ -3,7 +3,7 @@
 
 
 <!-- Definition of camera dimensions  -->
-<xacro:property name="cam_x" value="0.30" />
+<xacro:property name="cam_x" value="0.40" />
 <xacro:property name="cam_y" value="0.07" />
 <xacro:property name="cam_z" value="0.10" />
 

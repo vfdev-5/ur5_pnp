@@ -4,7 +4,8 @@
   
   <arg name="config" default="$(find move_group_ur5)/cfg/demo_gqcnn_pick_and_drop_single_object.yaml" />
   <arg name="world_camera_tf" default="$(find move_group_ur5)/cfg/sensor_to_world.tf" />
-  
+  <arg name="goal_joint_states" default="$(find move_group_ur5)/cfg/pick_and_drop.cmds" />
+
   <arg name="service_config" default="$(find move_group_ur5)/cfg/grasp_planner_node.suction.yaml" />
   <arg name="model_dir" default="$(find gqcnn)/models/GQ-Suction" />
 
@@ -26,13 +27,8 @@
     output="screen" >
     	<param name="config" value="$(arg config)" />
         <param name="world_camera_tf" value="$(arg world_camera_tf)" />
+        <param name="goal_joint_states"           value="$(arg goal_joint_states)" />
   </node>
-
-
-  <!--<node pkg="tf"-->
-        <!--type="static_transform_publisher"-->
-        <!--name="world_to_camera"-->
-        <!--args="-0.7 0.945 0.712 0.0 3.14159 0.0 world kinect2_camera_frame2 100"/>-->
 
   <node name="camera_to_world"  pkg="move_group_ur5" type="camera_world_broadcaster.py" output="screen" >
         <param name="world_camera_tf" value="$(arg world_camera_tf)" />

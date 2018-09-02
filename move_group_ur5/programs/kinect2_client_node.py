@@ -7,9 +7,6 @@ import time
 
 from autolab_core import RigidTransform
 from autolab_core import YamlConfig
-# from dexnet.grasping import RobotGripper
-# from yumipy import YuMiRobot, YuMiCommException, YuMiControlException, YuMiSubscriber
-# from yumipy import YuMiConstants as YMC
 from visualization import Visualizer2D as vis
 import perception as perception
 from perception import RgbdDetectorFactory, RgbdSensorFactory
@@ -17,6 +14,9 @@ from perception import RgbdDetectorFactory, RgbdSensorFactory
 from gqcnn.msg import GQCNNGrasp, BoundingBox
 from sensor_msgs.msg import Image, CameraInfo
 from gqcnn.srv import GQCNNGraspPlanner
+
+import tf2_geometry_msgs
+from geometry_msgs.msg import TransformStamped
 
 
 def run_experiment():
@@ -32,8 +32,9 @@ def run_experiment():
     # cv_bridge = CvBridge()
 
     # get camera intrinsics
+    # camera_intrinsics = sensor.color_intrinsics
     camera_intrinsics = sensor.ir_intrinsics
-    # rospy.loginfo('camera_intrinsics: {}'.format(camera_intrinsics.rosmsg))
+    rospy.loginfo('camera_intrinsics: {}'.format(camera_intrinsics.rosmsg))
 
     rospy.loginfo('Beginning experiment')
 
@@ -46,8 +47,8 @@ def run_experiment():
 
     print("inpainted_color_image: shape", inpainted_depth_image.shape)
 
-    detector_cfg['image_width'] = inpainted_depth_image.width // 5
-    detector_cfg['image_height'] = inpainted_depth_image.height // 5
+    detector_cfg['image_width'] = inpainted_depth_image.width // 6
+    detector_cfg['image_height'] = inpainted_depth_image.height // 6
     detector = RgbdDetectorFactory.detector('point_cloud_box')
     rospy.loginfo("Detect bbox")
     detection = detector.detect(
@@ -82,14 +83,25 @@ def run_experiment():
         rospy.loginfo("Planning time: {}".format(grasp_plan_time))
         rospy.loginfo("planned_grasp_data:\n{}".format(planned_grasp_data.grasp.pose))
 
-        # import matplotlib.pyplot as plt
-        # import cv2
-        # vis.figure()
-        # img = np.fromstring(planned_grasp_data.grasp.thumbnail.data, dtype=np.float32)
-        # img = img.reshape(32, 32)
-        # img = cv2.circle(img, (planned_grasp_data.grasp.pose))
-        # plt.imshow()
-        # vis.show()
+        grasp_camera_pose = planned_grasp_data.grasp
+        # create Stamped ROS Transform
+        camera_world_transform = TransformStamped()
+        camera_world_transform.header.stamp = rospy.Time.now()
+        camera_world_transform.header.frame_id = T_camera_world.from_frame
+        camera_world_transform.child_frame_id = T_camera_world.to_frame
+
+        camera_world_transform.transform.translation.x = T_camera_world.translation[0]
+        camera_world_transform.transform.translation.y = T_camera_world.translation[1]
+        camera_world_transform.transform.translation.z = T_camera_world.translation[2]
+
+        q = T_camera_world.quaternion
+        camera_world_transform.transform.rotation.x = q[1]
+        camera_world_transform.transform.rotation.y = q[2]
+        camera_world_transform.transform.rotation.z = q[3]
+        camera_world_transform.transform.rotation.w = q[0]
+
+        grasp_world_pose = tf2_geometry_msgs.do_transform_pose(grasp_camera_pose, camera_world_transform)
+        rospy.loginfo("World CS planned_grasp_data:\n{}".format(grasp_world_pose))
 
     except rospy.ServiceException as e:
         rospy.logerr("Service call failed: \n %s" % e)
@@ -125,4 +137,8 @@ if __name__ == '__main__':
         exit(0)
     signal.signal(signal.SIGINT, handler)
 
-    run_experiment()
+    counter = 5
+    while counter > 0 and not rospy.is_shutdown():
+        run_experiment()
+        counter -= 0
+

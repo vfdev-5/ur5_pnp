@@ -247,8 +247,8 @@ class PickAndDropProgram(object):
         inpainted_depth_image = depth_image.inpaint(rescale_factor=self.config['inpaint_rescale_factor'])
 
         detector_cfg = self.config['detector']
-        detector_cfg['image_width'] = inpainted_depth_image.width // 6
-        detector_cfg['image_height'] = inpainted_depth_image.height // 6
+        detector_cfg['image_width'] = inpainted_depth_image.width // 3
+        detector_cfg['image_height'] = inpainted_depth_image.height // 3
         detector = RgbdDetectorFactory.detector('point_cloud_box')
         detection = detector.detect(inpainted_color_image, inpainted_depth_image,
                                     detector_cfg,
@@ -287,6 +287,7 @@ class PickAndDropProgram(object):
                 return None
 
             grasp_camera_pose = planned_grasp_data.grasp
+
             rospy.loginfo('Processing Grasp')
             self.broadcast_pose_as_transform(self.tf_camera_world.from_frame, "object_link", grasp_camera_pose.pose)
 
@@ -307,6 +308,12 @@ class PickAndDropProgram(object):
             camera_world_transform.transform.rotation.w = q[0]
 
             grasp_world_pose = tf2_geometry_msgs.do_transform_pose(grasp_camera_pose, camera_world_transform)
+            # Hack orientation to 90 degree vertical pose
+            grasp_world_pose.pose.orientation.x = -0.718339806303
+            grasp_world_pose.pose.orientation.y = 0.00601026421019
+            grasp_world_pose.pose.orientation.z = 0.695637686512
+            grasp_world_pose.pose.orientation.w = 0.00632522789696
+
             rospy.loginfo("World CS planned_grasp_data:\n{}".format(grasp_world_pose))
             return grasp_world_pose.pose
 
@@ -345,7 +352,7 @@ def main():
         program.go_to_state(program.get_state('home'))
 
         vision_fail_counter = 5
-        while True:
+        while not rospy.is_shutdown():
 
             print("============ Press `Enter` to get object pose ...")
             c = raw_input()

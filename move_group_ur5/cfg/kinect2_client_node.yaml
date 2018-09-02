@@ -3,7 +3,12 @@ sensor_cfg:
   frame: kinect2_camera_frame
   auto_white_balance: 0
   flip_images: 1
+
   type: kinect2
+
+#  type: bridged_kinect2
+#  quality: hd
+
   pipeline_mode: 0
   device_num: 0
 

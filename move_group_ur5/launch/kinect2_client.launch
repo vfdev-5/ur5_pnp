@@ -13,6 +13,15 @@
     	<param name="model_dir"           value="$(arg model_dir)" />
   </node>
 
+  <node name="camera_to_world"  pkg="move_group_ur5" type="camera_world_broadcaster.py" output="screen" >
+        <param name="world_camera_tf" value="$(arg world_camera_tf)" />
+  </node>
+
+  <!--Static tf-->
+  <node pkg="tf" type="static_transform_publisher"
+        name="test_camera_object"
+        args="0 0 0.832914 0 0 0 1 kinect2_camera_frame cam_obj 100" />
+
   <node name="kinect2_client"  pkg="move_group_ur5" type="kinect2_client_node.py" output="screen" >
     <param name="config"           value="$(arg config)" />
     <param name="world_camera_tf"  value="$(arg world_camera_tf)" />

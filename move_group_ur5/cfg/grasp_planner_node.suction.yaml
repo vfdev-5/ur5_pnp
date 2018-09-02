@@ -1,15 +1,15 @@
 # policy params
 policy:
   # optimization params
-  num_seed_samples: 350 # number of seed samples
-  num_gmm_samples: 75
-  num_iters: 4
+  num_seed_samples: 500 # number of seed samples
+  num_gmm_samples: 100
+  num_iters: 5
   gmm_refit_p: 0.25
   gmm_component_frac: 0.4
   gmm_reg_covar: 0.01
 
   # general params
-  deterministic: 1
+  deterministic: 0
   max_approach_angle: 80
 
   # sampling params
@@ -31,7 +31,7 @@ policy:
     max_dist_from_center: 10000000000
     max_num_samples: 10000
 
-    num_grasp_samples: 500
+    num_grasp_samples: 750
 
   # metrics
   metric:
@@ -46,8 +46,8 @@ policy:
     tf_images: 0
     grasp_candidates: 0
     elite_grasps: 1
-    grasp_ranking: 0
-    grasp_plan: 0
+    grasp_ranking: 1
+    grasp_plan: 1
     final_grasp: 1
 
     vmin: 0.6
