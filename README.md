@@ -29,15 +29,15 @@ Two options are possible:
 #### Simulation
 ```
 source devel/setup.bash
-roslaunch ur5_moveit_config demo.launch
+sh src/ur5_pnp/run_simulation.sh
 ```
 
-![rviz](assets/rviz_demo_v2.png)
+![rviz](assets/rviz_demo_v3.png)
 
 #### Real robot
 Just run the script from the root of the workspace (`build`, `devel`, `src`):
 ```
-sh run_robot.sh
+sh src/ur5_pnp/run_robot.sh
 ```
 which starts `roscore` and necessary nodes in separate `xterm` windows.
 
