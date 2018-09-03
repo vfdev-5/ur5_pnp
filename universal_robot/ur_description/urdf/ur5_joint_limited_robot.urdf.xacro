@@ -15,11 +15,16 @@
   <xacro:include filename="$(find ur_description)/urdf/actuator.urdf.xacro" />
 
   <!-- arm -->
+  <xacro:property name="shoulder_pan_min" value="-2.15050727526" />
+  <xacro:property name="shoulder_pan_max" value="-0.38351947466" />
+  <xacro:property name="elbow_joint_max" value="-0.735245529805" />
+  <xacro:property name="wrist_1_max" value="-0.316594425832" />
+
   <xacro:ur5_robot prefix="" joint_limited="true"
-    shoulder_pan_lower_limit="${-pi}" shoulder_pan_upper_limit="${pi}"
+    shoulder_pan_lower_limit="${shoulder_pan_min}" shoulder_pan_upper_limit="${shoulder_pan_max}"
     shoulder_lift_lower_limit="${-pi}" shoulder_lift_upper_limit="${pi}"
-    elbow_joint_lower_limit="${-pi}" elbow_joint_upper_limit="${pi}"
-    wrist_1_lower_limit="${-pi}" wrist_1_upper_limit="${pi}"
+    elbow_joint_lower_limit="${-pi}" elbow_joint_upper_limit="${elbow_joint_max}"
+    wrist_1_lower_limit="${-pi}" wrist_1_upper_limit="${wrist_1_max}"
     wrist_2_lower_limit="${-pi}" wrist_2_upper_limit="${pi}"
     wrist_3_lower_limit="${-pi}" wrist_3_upper_limit="${pi}"
   />

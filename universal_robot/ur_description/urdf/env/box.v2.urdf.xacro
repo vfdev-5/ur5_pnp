@@ -7,7 +7,7 @@
   <!-- Definitions of box source dimensions  -->
   <xacro:property name="src_box_w" value="0.43" />
   <xacro:property name="src_box_h" value="0.28" />
-  <xacro:property name="src_box_z" value="0.164" />
+  <xacro:property name="src_box_z" value="0.175" />
 
   <!-- Definitions of box destination dimensions  -->
   <xacro:property name="dst_box_w" value="0.33" />

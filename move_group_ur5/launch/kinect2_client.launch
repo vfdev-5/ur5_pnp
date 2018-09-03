@@ -8,7 +8,7 @@
   <arg name="model_dir"        default="$(find gqcnn)/models/GQ-Suction" />
   <arg name="service_config" default="$(find move_group_ur5)/cfg/grasp_planner_node.suction.yaml" />
 
-  <node name="GQCNN_grasp_planner"  pkg="gqcnn" type="grasp_planner_node.py" output="screen" >
+  <node name="GQCNN_grasp_planner"  pkg="gqcnn" type="grasp_planner_node.py" respawn="true" output="screen" >
     	<param name="config"           value="$(arg service_config)" />
     	<param name="model_dir"           value="$(arg model_dir)" />
   </node>

@@ -47,8 +47,8 @@ def run_experiment():
 
     print("inpainted_color_image: shape", inpainted_depth_image.shape)
 
-    detector_cfg['image_width'] = inpainted_depth_image.width // 6
-    detector_cfg['image_height'] = inpainted_depth_image.height // 6
+    detector_cfg['image_width'] = inpainted_depth_image.width // 3
+    detector_cfg['image_height'] = inpainted_depth_image.height // 3
     detector = RgbdDetectorFactory.detector('point_cloud_box')
     rospy.loginfo("Detect bbox")
     detection = detector.detect(
@@ -137,7 +137,7 @@ if __name__ == '__main__':
         exit(0)
     signal.signal(signal.SIGINT, handler)
 
-    counter = 5
+    counter = 1
     while counter > 0 and not rospy.is_shutdown():
         run_experiment()
         counter -= 0

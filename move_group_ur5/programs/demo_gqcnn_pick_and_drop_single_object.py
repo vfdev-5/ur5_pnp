@@ -11,6 +11,7 @@ from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 import tf2_geometry_msgs
 from geometry_msgs.msg import TransformStamped
+import signal
 
 from autolab_core import YamlConfig
 from visualization import Visualizer2D as vis
@@ -42,6 +43,8 @@ import joint_state_filereader
 # DROP_POSE = geometry_msgs.msg.Pose(
 #     position=Point(-1.06653140818, 0.305945123927, 0.123294518075),
 #     orientation=Quaternion(0.21940752316, 0.685697802181, -0.305246393463, 0.62330049105))
+
+KEYBOARD_PAUSE = False
 
 
 def all_close(goal, actual, tolerance):
@@ -230,8 +233,12 @@ class PickAndDropProgram(object):
 
     def turn_on_suction_pad(self):
         self.pub_to.publish("SUCKER:ON")
+        self.pub_to.publish("SUCKER:ON")
+        self.pub_to.publish("SUCKER:ON")
 
     def turn_off_suction_pad(self):
+        self.pub_to.publish("SUCKER:OFF")
+        self.pub_to.publish("SUCKER:OFF")
         self.pub_to.publish("SUCKER:OFF")
 
     def get_state(self, name):
@@ -308,6 +315,13 @@ class PickAndDropProgram(object):
             camera_world_transform.transform.rotation.w = q[0]
 
             grasp_world_pose = tf2_geometry_msgs.do_transform_pose(grasp_camera_pose, camera_world_transform)
+
+            # if grasp_world_pose.pose.position.z < 0.05:
+            #     rospy.logwarn("Predicted pose Z value is less than 5 cm -> bad pose")
+            #     return None
+
+            # Hack z position
+            # grasp_world_pose.pose.position.z += 0.0075
             # Hack orientation to 90 degree vertical pose
             grasp_world_pose.pose.orientation.x = -0.718339806303
             grasp_world_pose.pose.orientation.y = 0.00601026421019
@@ -342,103 +356,163 @@ class PickAndDropProgram(object):
 
 def main():
 
+
     try:
         program = PickAndDropProgram()
 
+        # setup safe termination
+        def handler(signum, frame):
+            rospy.loginfo('caught CTRL+C, exiting...')
+            if program.sensor is not None:
+                program.sensor.stop()
+
+            program.turn_off_suction_pad()
+            program.go_to_state(program.get_state('home'))
+            exit(0)
+
+        signal.signal(signal.SIGINT, handler)
+
+
         print("============ Press `Enter` to initialize pose")
-        c = raw_input()
-        if c == 'q':
-            return
+        if KEYBOARD_PAUSE:
+            c = raw_input()
+            if c == 'q':
+                return
+        else:
+            time.sleep(0.33)
+
         program.go_to_state(program.get_state('home'))
 
         vision_fail_counter = 5
         while not rospy.is_shutdown():
 
             print("============ Press `Enter` to get object pose ...")
-            c = raw_input()
-            if c == 'q':
-                break
+            if KEYBOARD_PAUSE:
+                c = raw_input()
+                if c == 'q':
+                    break
+            else:
+                time.sleep(0.33)
+
             object_pose = program.compute_object_pose()
             if object_pose is None:
                 vision_fail_counter -= 1
                 if vision_fail_counter == 0:
                     break
+                time.sleep(5)
                 continue
             else:
                 vision_fail_counter = 5
 
             print("============ Press `Enter` to go to near box pose ...")
-            c = raw_input()
-            if c == 'q':
-                break
+            if KEYBOARD_PAUSE:
+                c = raw_input()
+                if c == 'q':
+                    break
+            else:
+                time.sleep(0.33)
             if not program.go_to_state(program.get_state('near_box')):
                 break
 
             print("============ Press `Enter` to turn on suction pad ...")
-            c = raw_input()
-            if c == 'q':
-                break
+
+            if KEYBOARD_PAUSE:
+                c = raw_input()
+                if c == 'q':
+                    break
+            else:
+                time.sleep(0.33)
+
             # turn on suction pad
             program.turn_on_suction_pad()
 
             print("============ Press `Enter` to plan to pick object pose ...")
-            c = raw_input()
-            if c == 'q':
-                break
+            if KEYBOARD_PAUSE:
+                c = raw_input()
+                if c == 'q':
+                    break
+            else:
+                time.sleep(0.33)
 
-            # if not program.go_to_pose(object_pose):
-            #     break
             plan_msg = program.plan_to_pose(object_pose)
             print("Plan nb of points", len(plan_msg.joint_trajectory.points))
             if len(plan_msg.joint_trajectory.points) == 0:
-                break
+                program.turn_off_suction_pad()
+                program.go_to_state(program.get_state('home'))
+                continue
 
             print("============ Press `Enter` to execute to pick object pose ...")
-            c = raw_input()
-            if c == 'q':
-                break
+
+            if KEYBOARD_PAUSE:
+                c = raw_input()
+                if c == 'q':
+                    break
+            else:
+                time.sleep(0.33)
+
             if not program.execute_plan(plan_msg, object_pose):
                 break
 
             print("============ Press `Enter` to go to near box pose ...")
-            c = raw_input()
-            if c == 'q':
-                break
+            if KEYBOARD_PAUSE:
+                c = raw_input()
+                if c == 'q':
+                    break
+            else:
+                time.sleep(0.33)
+
             if not program.go_to_state(program.get_state('near_box')):
                 break
 
             print("============ Press `Enter` to go to near drop pose ...")
-            c = raw_input()
-            if c == 'q':
-                break
+            if KEYBOARD_PAUSE:
+                c = raw_input()
+                if c == 'q':
+                    break
+            else:
+                time.sleep(0.33)
+
             if not program.go_to_state(program.get_state('near_drop')):
                 break
 
             print("============ Press `Enter` to go to drop pose ...")
-            c = raw_input()
-            if c == 'q':
-                break
-            if not program.go_to_state(program.get_state('near_drop')):
+            if KEYBOARD_PAUSE:
+                c = raw_input()
+                if c == 'q':
+                    break
+            else:
+                time.sleep(0.33)
+
+            if not program.go_to_state(program.get_state('drop')):
                 break
 
             print("============ Press `Enter` to turn off suction pad ...")
-            c = raw_input()
-            if c == 'q':
-                break
+            if KEYBOARD_PAUSE:
+                c = raw_input()
+                if c == 'q':
+                    break
+            else:
+                time.sleep(0.33)
             # turn off suction pad
             program.turn_off_suction_pad()
 
             print("============ Press `Enter` to go to near drop pose ...")
-            c = raw_input()
-            if c == 'q':
-                break
+            if KEYBOARD_PAUSE:
+                c = raw_input()
+                if c == 'q':
+                    break
+            else:
+                time.sleep(0.33)
             if not program.go_to_state(program.get_state('near_drop')):
                 break
 
             print("============ Press `Enter` to continue or `q` to quit ...")
-            c = raw_input()
-            if c == 'q':
-                break
+            if KEYBOARD_PAUSE:
+                c = raw_input()
+                if c == 'q':
+                    break
+            else:
+                time.sleep(0.33)
 
         program.turn_off_suction_pad()
         program.go_to_state(program.get_state('home'))
